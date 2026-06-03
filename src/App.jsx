@@ -12,9 +12,9 @@ import { useUI } from './ui-context'
 import './App.css'
 
 const TABS = [
-  { id: 'recipes', label: '菜谱', short: '菜谱', icon: '📖' },
-  { id: 'plan', label: '明天吃什么', short: '吃什么', icon: '📅' },
-  { id: 'diary', label: '做饭日记', short: '日记', icon: '📔' },
+  { id: 'recipes', label: '菜谱', short: '菜谱' },
+  { id: 'plan', label: '明天吃什么', short: '吃什么' },
+  { id: 'diary', label: '做饭日记', short: '日记' },
 ]
 
 export default function App() {
@@ -208,7 +208,7 @@ export default function App() {
             setView('list')
           }}
         >
-          <span className="logo">🍳</span>
+          <span className="logo">灶</span>
           <div>
             <h1>菜谱规划</h1>
             <p>给新手厨师的备菜清单</p>
@@ -226,7 +226,6 @@ export default function App() {
                   if (t.id === 'recipes') setView('list')
                 }}
               >
-                <span className="tab-icon">{t.icon}</span>
                 {t.label}
               </button>
             ))}
@@ -237,7 +236,7 @@ export default function App() {
 
       {hasUpdate && (
         <button className="update-banner" onClick={() => doFetch()}>
-          🔄 有新的改动，点击刷新查看
+          有新的改动，点击刷新查看
         </button>
       )}
 
@@ -250,7 +249,7 @@ export default function App() {
 
       {!loading && loadError && (
         <main className="content state-screen">
-          <p className="state-error">😕 加载失败：{loadError}</p>
+          <p className="state-error">加载失败：{loadError}</p>
           <button className="btn primary" onClick={retryLoad}>
             重试
           </button>
@@ -310,7 +309,7 @@ export default function App() {
               onClick={generateAndOpen}
               disabled={genBusy || !genInput.trim()}
             >
-              {genBusy ? 'AI 生成中…' : '✨ AI 生成菜谱'}
+              {genBusy ? 'AI 生成中…' : 'AI 生成菜谱'}
             </button>
           </div>
 
@@ -398,7 +397,7 @@ export default function App() {
       )}
 
       <nav className="bottom-nav">
-        {[{ id: 'home', icon: '🏠', short: '首页' }, ...TABS].map((t) => (
+        {[{ id: 'home', short: '首页' }, ...TABS].map((t) => (
           <button
             key={t.id}
             className={'bn-item' + (tab === t.id ? ' active' : '')}
@@ -407,7 +406,6 @@ export default function App() {
               if (t.id === 'recipes') setView('list')
             }}
           >
-            <span className="bn-icon">{t.icon}</span>
             <span className="bn-label">{t.short}</span>
           </button>
         ))}
@@ -432,7 +430,7 @@ function SkeletonCard() {
       <div className="sk-line sk-title" />
       <div className="sk-line sk-meta" />
       <div className="sk-line sk-tag" />
-      <p className="sk-hint">✨ AI 正在生成菜谱…</p>
+      <p className="sk-hint">AI 正在生成菜谱…</p>
     </article>
   )
 }

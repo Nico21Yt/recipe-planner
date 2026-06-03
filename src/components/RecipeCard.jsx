@@ -15,7 +15,7 @@ export default function RecipeCard({
         <div className="card-cover">
           <img src={cover.src} alt={recipe.name} loading="lazy" />
           {photos.length > 1 && (
-            <span className="cover-count">📷 {photos.length}</span>
+            <span className="cover-count">{photos.length} 张</span>
           )}
         </div>
       )}
@@ -26,15 +26,15 @@ export default function RecipeCard({
         <div className="card-top-right">
           <span className="cat">{recipe.category}</span>
           <button
+            type="button"
             className={'star' + (recipe.favorite ? ' on' : '')}
             title={recipe.favorite ? '取消收藏' : '收藏'}
+            aria-label={recipe.favorite ? '取消收藏' : '收藏'}
             onClick={(e) => {
               e.stopPropagation()
               onToggleFavorite?.()
             }}
-          >
-            {recipe.favorite ? '★' : '☆'}
-          </button>
+          />
         </div>
       </div>
       <h3 className="card-title">{recipe.name || '未命名'}</h3>

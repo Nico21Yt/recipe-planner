@@ -103,12 +103,12 @@ export default function RecipeDetail({
         <div className="detail-title">
           <h2>{recipe.name}</h2>
           <button
+            type="button"
             className={'star big' + (recipe.favorite ? ' on' : '')}
             title={recipe.favorite ? '取消收藏' : '收藏'}
+            aria-label={recipe.favorite ? '取消收藏' : '收藏'}
             onClick={onToggleFavorite}
-          >
-            {recipe.favorite ? '★' : '☆'}
-          </button>
+          />
         </div>
         <div className="meta big">
           <span className="cat">{recipe.category}</span>
@@ -142,7 +142,7 @@ export default function RecipeDetail({
 
       <div className="detail-grid">
         <section className="panel">
-          <h3>🧺 材料清单</h3>
+          <h3>材料清单</h3>
           <ul className="ingredients">
             {recipe.ingredients.map((ing, i) => (
               <li
@@ -150,7 +150,7 @@ export default function RecipeDetail({
                 className={checked.has(i) ? 'done' : ''}
                 onClick={() => toggle(i)}
               >
-                <span className="check">{checked.has(i) ? '✓' : ''}</span>
+                <span className={'check' + (checked.has(i) ? ' on' : '')} />
                 <span className="ing-name">{ing.name}</span>
                 <span className="ing-amount">{ing.amount}</span>
               </li>
@@ -160,7 +160,7 @@ export default function RecipeDetail({
         </section>
 
         <section className="panel">
-          <h3>👨‍🍳 做法步骤</h3>
+          <h3>做法步骤</h3>
           <ol className="steps">
             {recipe.steps.map((step, i) => (
               <li key={i}>{step}</li>
@@ -171,20 +171,20 @@ export default function RecipeDetail({
 
       {recipe.notes && (
         <section className="panel notes">
-          <h3>📝 小贴士 / 心得</h3>
+          <h3>小贴士 / 心得</h3>
           <p>{recipe.notes}</p>
         </section>
       )}
 
       <section className="panel photos-panel">
         <div className="photos-head">
-          <h3>📸 成品记录</h3>
+          <h3>成品记录</h3>
           <button
             className="btn primary small"
             onClick={() => photoRef.current?.click()}
             disabled={busy}
           >
-            {busy ? '处理中…' : '＋ 上传照片'}
+            {busy ? '处理中…' : '上传照片'}
           </button>
           <input
             ref={photoRef}
@@ -231,7 +231,7 @@ export default function RecipeDetail({
                 onChange={(e) => updateCaption(photo.id, e.target.value)}
               />
               <label className="lightbox-date-edit" title="拍摄/做菜日期，日记按它归类">
-                📅
+                <span className="date-label">日期</span>
                 <input
                   type="date"
                   value={dayOf(photo.date)}

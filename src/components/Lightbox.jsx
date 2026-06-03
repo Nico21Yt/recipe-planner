@@ -43,9 +43,12 @@ export default function Lightbox({ photos, startIndex = 0, onClose, renderBar })
   return (
     <div className="lightbox" onClick={onClose}>
       <div className="lightbox-inner" onClick={(e) => e.stopPropagation()}>
-        <button className="lightbox-close" onClick={onClose}>
-          ✕
-        </button>
+        <button
+          type="button"
+          className="lightbox-close"
+          aria-label="关闭"
+          onClick={onClose}
+        />
 
         <div
           className="lightbox-img"
@@ -53,15 +56,11 @@ export default function Lightbox({ photos, startIndex = 0, onClose, renderBar })
           onTouchEnd={onTouchEnd}
         >
           {count > 1 && (
-            <button className="lb-nav prev" onClick={prev} aria-label="上一张">
-              ‹
-            </button>
+            <button type="button" className="lb-nav prev" onClick={prev} aria-label="上一张" />
           )}
           <img src={photo.src} alt={photo.caption || ''} />
           {count > 1 && (
-            <button className="lb-nav next" onClick={next} aria-label="下一张">
-              ›
-            </button>
+            <button type="button" className="lb-nav next" onClick={next} aria-label="下一张" />
           )}
         </div>
 

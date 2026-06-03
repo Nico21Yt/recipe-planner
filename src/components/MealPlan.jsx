@@ -140,13 +140,20 @@ export default function MealPlan({
                   onClick={() => d.recipeId && onOpenRecipe(d.recipeId)}
                   title={d.recipeId ? '查看菜谱' : '自定义菜（菜谱里还没有）'}
                 >
-                  <span className="dish-glyph" aria-hidden>
-                    {d.recipeId ? '🍽' : '✎'}
-                  </span>
+                  {d.recipeId ? (
+                    <span className="dish-kind">菜谱</span>
+                  ) : (
+                    <span className="dish-kind custom">自定</span>
+                  )}
                   {d.name}
                 </span>
-                <button className="btn icon" onClick={() => removeDish(d.id)}>
-                  ✕
+                <button
+                  type="button"
+                  className="btn icon"
+                  aria-label="移除"
+                  onClick={() => removeDish(d.id)}
+                >
+                  移除
                 </button>
               </li>
             ))}
@@ -186,9 +193,7 @@ export default function MealPlan({
                 setOpen((v) => !v)
                 inputRef.current?.focus()
               }}
-            >
-              ▾
-            </button>
+            />
 
             {open && (
               <ul className="combo-menu">
@@ -200,9 +205,6 @@ export default function MealPlan({
                         className="combo-item"
                         onClick={() => addDish(r.name)}
                       >
-                        <span className="dish-glyph" aria-hidden>
-                          🍽
-                        </span>
                         {r.name}
                       </button>
                     </li>
@@ -217,7 +219,7 @@ export default function MealPlan({
                       className="combo-item new"
                       onClick={() => addDish()}
                     >
-                      ✨ 用 AI 生成「{input.trim()}」
+                      用 AI 生成「{input.trim()}」
                     </button>
                   </li>
                 )}
@@ -229,7 +231,7 @@ export default function MealPlan({
             onClick={() => addDish()}
             disabled={busy || !input.trim()}
           >
-            {busy ? 'AI 生成中…' : isNewDish ? '✨ 生成并添加' : '添加'}
+            {busy ? 'AI 生成中…' : isNewDish ? '生成并添加' : '添加'}
           </button>
         </div>
         {isNewDish && !busy && (

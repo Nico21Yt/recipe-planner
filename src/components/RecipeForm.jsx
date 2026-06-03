@@ -131,8 +131,14 @@ export default function RecipeForm({ initial, onCancel, onSave }) {
           <span>标签</span>
           <div className="tag-editor">
             {r.tags.map((t) => (
-              <span key={t} className="tag removable" onClick={() => removeTag(t)}>
-                {t} ✕
+              <span key={t} className="tag removable">
+                {t}
+                <button
+                  type="button"
+                  className="tag-remove"
+                  aria-label={'移除标签 ' + t}
+                  onClick={() => removeTag(t)}
+                />
               </span>
             ))}
             <input
@@ -168,15 +174,14 @@ export default function RecipeForm({ initial, onCancel, onSave }) {
                 <button
                   type="button"
                   className="btn icon"
+                  aria-label="删除材料"
                   onClick={() => removeIngredient(i)}
-                >
-                  ✕
-                </button>
+                />
               </div>
             ))}
           </div>
           <button type="button" className="btn ghost small" onClick={addIngredient}>
-            ＋ 添加材料
+            添加材料
           </button>
         </div>
 
@@ -195,15 +200,14 @@ export default function RecipeForm({ initial, onCancel, onSave }) {
                 <button
                   type="button"
                   className="btn icon"
+                  aria-label="删除步骤"
                   onClick={() => removeStep(i)}
-                >
-                  ✕
-                </button>
+                />
               </div>
             ))}
           </div>
           <button type="button" className="btn ghost small" onClick={addStep}>
-            ＋ 添加步骤
+            添加步骤
           </button>
         </div>
 
