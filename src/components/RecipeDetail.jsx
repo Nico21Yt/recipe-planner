@@ -176,7 +176,6 @@ export default function RecipeDetail({
             ref={photoRef}
             type="file"
             accept="image/*"
-            capture="environment"
             multiple
             hidden
             onChange={handleAddPhotos}
