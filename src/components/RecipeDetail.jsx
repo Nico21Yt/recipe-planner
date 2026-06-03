@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { DIFFICULTY, STATUS, dayOf, readPhoto } from '../storage'
+import { uploadPhoto } from '../cloud'
 
 function formatDate(iso) {
   try {
@@ -43,11 +44,13 @@ export default function RecipeDetail({
     try {
       const added = []
       for (const file of files) {
-        added.push(await readPhoto(file))
+        const photo = await readPhoto(file) // 压缩成 dataURL
+        const url = await uploadPhoto(photo.src) // 上传到云端，换成 URL
+        added.push({ ...photo, src: url })
       }
       onPhotosChange([...(recipe.photos || []), ...added])
     } catch (err) {
-      alert('照片处理失败：' + err.message)
+      alert('照片上传失败：' + err.message)
     } finally {
       setBusy(false)
     }

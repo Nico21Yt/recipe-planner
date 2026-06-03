@@ -1,8 +1,3 @@
-import seed from './data/recipes.json'
-
-const STORAGE_KEY = 'recipe-planner.recipes.v1'
-const PLANS_KEY = 'recipe-planner.plans.v1'
-
 export const CATEGORIES = ['家常菜', '汤羹', '主食', '甜点', '凉菜', '早餐', '其他']
 
 export const STATUS = {
@@ -19,42 +14,6 @@ export const DIFFICULTY = {
 
 function uid() {
   return 'r_' + Math.random().toString(36).slice(2, 9)
-}
-
-// 读取：优先用浏览器本地编辑过的数据，否则用仓库里的种子数据
-export function loadRecipes() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw)
-  } catch {
-    // 解析失败则回退到种子数据
-  }
-  return structuredClone(seed)
-}
-
-export function saveRecipes(recipes) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(recipes))
-    return { ok: true }
-  } catch (e) {
-    // 多为照片过多导致浏览器存储空间不足（QuotaExceededError）
-    return { ok: false, error: e }
-  }
-}
-
-// 放弃本地的文字修改，重新加载仓库（git）里的版本；
-// 但会按菜的 id 保留已拍的成品照片，避免误删记录
-export function resetToRepo(current = []) {
-  const photoMap = {}
-  current.forEach((r) => {
-    if (r.photos?.length) photoMap[r.id] = r.photos
-  })
-  const fresh = structuredClone(seed).map((r) => ({
-    ...r,
-    photos: photoMap[r.id] || r.photos || [],
-  }))
-  localStorage.removeItem(STORAGE_KEY)
-  return fresh
 }
 
 export function emptyRecipe() {
@@ -111,39 +70,7 @@ export function readPhoto(file, maxSize = 1280, quality = 0.82) {
   })
 }
 
-// 导出为 recipes.json 文件，用户提交到 git 即可同步
-export function exportRecipes(recipes) {
-  const blob = new Blob([JSON.stringify(recipes, null, 2)], {
-    type: 'application/json',
-  })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'recipes.json'
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
 /* ============== 用餐计划（明天吃什么 / 做饭日记） ============== */
-
-export function loadPlans() {
-  try {
-    const raw = localStorage.getItem(PLANS_KEY)
-    if (raw) return JSON.parse(raw)
-  } catch {
-    // 忽略解析错误
-  }
-  return []
-}
-
-export function savePlans(plans) {
-  try {
-    localStorage.setItem(PLANS_KEY, JSON.stringify(plans))
-    return { ok: true }
-  } catch (e) {
-    return { ok: false, error: e }
-  }
-}
 
 export function emptyPlan(date) {
   return {
@@ -207,21 +134,4 @@ export function formatMD(dateStr) {
   const d = new Date(dateStr + 'T00:00:00')
   if (isNaN(d)) return dateStr
   return `${d.getMonth() + 1}月${d.getDate()}日`
-}
-
-export function importRecipes(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(reader.result)
-        if (!Array.isArray(data)) throw new Error('文件格式不正确')
-        resolve(data)
-      } catch (e) {
-        reject(e)
-      }
-    }
-    reader.onerror = () => reject(reader.error)
-    reader.readAsText(file)
-  })
 }

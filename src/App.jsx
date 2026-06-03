@@ -1,13 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import {
-  CATEGORIES,
-  STATUS,
-  emptyRecipe,
-  loadPlans,
-  loadRecipes,
-  savePlans,
-  saveRecipes,
-} from './storage'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { CATEGORIES, STATUS, emptyRecipe } from './storage'
 import RecipeCard from './components/RecipeCard'
 import RecipeDetail from './components/RecipeDetail'
 import RecipeForm from './components/RecipeForm'
@@ -15,6 +7,7 @@ import MealPlan from './components/MealPlan'
 import Diary from './components/Diary'
 import Home from './components/Home'
 import { generateRecipe } from './ai'
+import { fetchData, saveData } from './cloud'
 import './App.css'
 
 const TABS = [
@@ -25,8 +18,8 @@ const TABS = [
 
 export default function App() {
   const [tab, setTab] = useState('home')
-  const [recipes, setRecipes] = useState(() => loadRecipes())
-  const [plans, setPlans] = useState(() => loadPlans())
+  const [recipes, setRecipes] = useState([])
+  const [plans, setPlans] = useState([])
   const [view, setView] = useState('list') // list | detail | form
   const [activeId, setActiveId] = useState(null)
   const [search, setSearch] = useState('')
@@ -34,25 +27,48 @@ export default function App() {
   const [filterCategory, setFilterCategory] = useState('all')
   const [genInput, setGenInput] = useState('')
   const [genBusy, setGenBusy] = useState(false)
-  const quotaWarned = useRef(false)
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(null)
+  const [saveState, setSaveState] = useState('idle') // idle | saving | saved | error
+  const loadedRef = useRef(false)
+  const saveTimer = useRef(null)
+
+  const doFetch = useCallback(() => {
+    return fetchData()
+      .then(({ recipes, plans }) => {
+        setRecipes(recipes)
+        setPlans(plans)
+        setLoadError(null)
+      })
+      .catch((e) => setLoadError(e.message))
+      .finally(() => {
+        setLoading(false)
+        loadedRef.current = true
+      })
+  }, [])
+
+  function retryLoad() {
+    setLoading(true)
+    setLoadError(null)
+    doFetch()
+  }
 
   useEffect(() => {
-    const res = saveRecipes(recipes)
-    if (!res.ok) {
-      if (!quotaWarned.current) {
-        quotaWarned.current = true
-        alert(
-          '浏览器存储空间已满，最新的照片可能没保存上。\n建议先「导出 JSON」备份，或删掉一些旧照片。',
-        )
-      }
-    } else {
-      quotaWarned.current = false
-    }
-  }, [recipes])
+    doFetch()
+  }, [doFetch])
 
+  // 任意改动后，防抖保存整份数据到云端
   useEffect(() => {
-    savePlans(plans)
-  }, [plans])
+    if (!loadedRef.current) return
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    setSaveState('saving')
+    saveTimer.current = setTimeout(() => {
+      saveData({ recipes, plans })
+        .then(() => setSaveState('saved'))
+        .catch(() => setSaveState('error'))
+    }, 600)
+    return () => saveTimer.current && clearTimeout(saveTimer.current)
+  }, [recipes, plans])
 
   const active = recipes.find((r) => r.id === activeId) || null
 
@@ -186,7 +202,23 @@ export default function App() {
 
       </header>
 
-      {tab === 'home' && (
+      {loading && (
+        <main className="content state-screen">
+          <div className="spinner" />
+          <p>正在从云端加载…</p>
+        </main>
+      )}
+
+      {!loading && loadError && (
+        <main className="content state-screen">
+          <p className="state-error">😕 加载失败：{loadError}</p>
+          <button className="btn primary" onClick={retryLoad}>
+            重试
+          </button>
+        </main>
+      )}
+
+      {!loading && !loadError && tab === 'home' && (
         <Home
           recipes={recipes}
           plans={plans}
@@ -197,7 +229,7 @@ export default function App() {
         />
       )}
 
-      {tab === 'plan' && (
+      {!loading && !loadError && tab === 'plan' && (
         <MealPlan
           plans={plans}
           recipes={recipes}
@@ -207,11 +239,11 @@ export default function App() {
         />
       )}
 
-      {tab === 'diary' && (
+      {!loading && !loadError && tab === 'diary' && (
         <Diary plans={plans} recipes={recipes} onOpenRecipe={openRecipeFromTab} />
       )}
 
-      {tab === 'recipes' && view === 'list' && (
+      {!loading && !loadError && tab === 'recipes' && view === 'list' && (
         <main className="content">
           <div className="section-head">
             <div>
@@ -300,7 +332,7 @@ export default function App() {
         </main>
       )}
 
-      {tab === 'recipes' && view === 'detail' && active && (
+      {!loading && !loadError && tab === 'recipes' && view === 'detail' && active && (
         <RecipeDetail
           recipe={active}
           onBack={() => setView('list')}
@@ -311,7 +343,7 @@ export default function App() {
         />
       )}
 
-      {tab === 'recipes' && view === 'form' && (
+      {!loading && !loadError && tab === 'recipes' && view === 'form' && (
         <RecipeForm
           initial={active || emptyRecipe()}
           onCancel={() => setView(active ? 'detail' : 'list')}
@@ -320,7 +352,12 @@ export default function App() {
       )}
 
       <footer className="foot">
-        🍳 菜谱规划 · 数据保存在你的浏览器本地
+        🍳 菜谱规划 · 云端共享数据
+        {saveState === 'saving' && <span className="sync"> · 保存中…</span>}
+        {saveState === 'saved' && <span className="sync ok"> · 已同步</span>}
+        {saveState === 'error' && (
+          <span className="sync err"> · 保存失败，请检查网络</span>
+        )}
       </footer>
     </div>
   )
