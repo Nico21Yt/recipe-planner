@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
 import { DIFFICULTY, STATUS, dayOf, readPhoto } from '../storage'
-import { uploadPhoto } from '../cloud'
+import { uploadPhoto, deletePhotoBlob } from '../cloud'
+import { useUI } from '../ui-context'
+import Lightbox from './Lightbox'
 
 function formatDate(iso) {
   try {
@@ -21,9 +23,11 @@ export default function RecipeDetail({
   onDelete,
   onStatusChange,
   onPhotosChange,
+  onToggleFavorite,
 }) {
+  const { toast, confirm } = useUI()
   const [checked, setChecked] = useState(() => new Set())
-  const [lightbox, setLightbox] = useState(null) // 放大查看的照片
+  const [lightboxIndex, setLightboxIndex] = useState(null)
   const [busy, setBusy] = useState(false)
   const photoRef = useRef(null)
   const photos = recipe.photos || []
@@ -49,17 +53,21 @@ export default function RecipeDetail({
         added.push({ ...photo, src: url })
       }
       onPhotosChange([...(recipe.photos || []), ...added])
+      toast('照片已上传', 'success')
     } catch (err) {
-      alert('照片上传失败：' + err.message)
+      toast('照片上传失败：' + err.message, 'error', 4000)
     } finally {
       setBusy(false)
     }
   }
 
-  function deletePhoto(id) {
-    if (!confirm('删除这张照片？')) return
+  async function deletePhoto(id) {
+    const ok = await confirm('删除这张照片？', { danger: true, confirmText: '删除' })
+    if (!ok) return
+    const target = (recipe.photos || []).find((p) => p.id === id)
     onPhotosChange((recipe.photos || []).filter((p) => p.id !== id))
-    setLightbox(null)
+    setLightboxIndex(null)
+    if (target?.src) deletePhotoBlob(target.src)
   }
 
   function updateCaption(id, caption) {
@@ -92,7 +100,16 @@ export default function RecipeDetail({
       </div>
 
       <div className="detail-head">
-        <h2>{recipe.name}</h2>
+        <div className="detail-title">
+          <h2>{recipe.name}</h2>
+          <button
+            className={'star big' + (recipe.favorite ? ' on' : '')}
+            title={recipe.favorite ? '取消收藏' : '收藏'}
+            onClick={onToggleFavorite}
+          >
+            {recipe.favorite ? '★' : '☆'}
+          </button>
+        </div>
         <div className="meta big">
           <span className="cat">{recipe.category}</span>
           <span>⏱ {recipe.time} 分钟</span>
@@ -188,13 +205,13 @@ export default function RecipeDetail({
           </p>
         ) : (
           <div className="photo-grid">
-            {photos.map((p) => (
+            {photos.map((p, i) => (
               <figure key={p.id} className="photo-item">
                 <img
                   src={p.src}
                   alt={p.caption || recipe.name}
                   loading="lazy"
-                  onClick={() => setLightbox(p)}
+                  onClick={() => setLightboxIndex(i)}
                 />
                 <figcaption>{formatDate(p.date)}</figcaption>
               </figure>
@@ -203,45 +220,36 @@ export default function RecipeDetail({
         )}
       </section>
 
-      {lightbox && (
-        <div className="lightbox" onClick={() => setLightbox(null)}>
-          <div className="lightbox-inner" onClick={(e) => e.stopPropagation()}>
-            <button className="lightbox-close" onClick={() => setLightbox(null)}>
-              ✕
-            </button>
-            <img src={lightbox.src} alt={lightbox.caption || recipe.name} />
+      {lightboxIndex != null && (
+        <Lightbox
+          photos={photos}
+          startIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          renderBar={(photo) => (
             <div className="lightbox-bar">
               <input
                 className="caption-input"
                 placeholder="加一句话，比如「第一次做，有点咸」"
-                value={lightbox.caption}
-                onChange={(e) => {
-                  const v = e.target.value
-                  setLightbox((lb) => ({ ...lb, caption: v }))
-                  updateCaption(lightbox.id, v)
-                }}
+                value={photo.caption || ''}
+                onChange={(e) => updateCaption(photo.id, e.target.value)}
               />
               <label className="lightbox-date-edit" title="拍摄/做菜日期，日记按它归类">
                 📅
                 <input
                   type="date"
-                  value={dayOf(lightbox.date)}
-                  onChange={(e) => {
-                    const day = e.target.value
-                    setLightbox((lb) => ({ ...lb, date: day + 'T12:00:00' }))
-                    updateDate(lightbox.id, day)
-                  }}
+                  value={dayOf(photo.date)}
+                  onChange={(e) => updateDate(photo.id, e.target.value)}
                 />
               </label>
               <button
                 className="btn danger small"
-                onClick={() => deletePhoto(lightbox.id)}
+                onClick={() => deletePhoto(photo.id)}
               >
                 删除
               </button>
             </div>
-          </div>
-        </div>
+          )}
+        />
       )}
     </main>
   )

@@ -1,0 +1,29 @@
+{
+  "name": "菜谱规划",
+  "short_name": "菜谱规划",
+  "description": "给新手厨师的备菜清单：管理菜谱、规划明天吃什么、记录做饭日记。",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#f3f8f1",
+  "theme_color": "#3da35d",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

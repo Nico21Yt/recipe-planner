@@ -3,6 +3,10 @@
 
 const DATA_URL = import.meta.env.VITE_DATA_API || '/api/data'
 const UPLOAD_URL = import.meta.env.VITE_UPLOAD_API || '/api/upload'
+const DELETE_URL = import.meta.env.VITE_DELETE_API || '/api/delete-blob'
+
+// 本次会话的随机标识，用来判断「云端更新是不是自己刚保存的」
+export const CLIENT_ID = Math.random().toString(36).slice(2)
 
 export async function fetchData() {
   let resp
@@ -23,14 +27,17 @@ export async function fetchData() {
   return {
     recipes: Array.isArray(data.recipes) ? data.recipes : [],
     plans: Array.isArray(data.plans) ? data.plans : [],
+    updatedAt: data.updatedAt || 0,
+    clientId: data.clientId || '',
   }
 }
 
 export async function saveData({ recipes, plans }) {
+  const updatedAt = Date.now()
   const resp = await fetch(DATA_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ recipes, plans }),
+    body: JSON.stringify({ recipes, plans, updatedAt, clientId: CLIENT_ID }),
   })
   if (!resp.ok) {
     let msg = `保存失败（${resp.status}）`
@@ -42,7 +49,7 @@ export async function saveData({ recipes, plans }) {
     }
     throw new Error(msg)
   }
-  return true
+  return updatedAt
 }
 
 // 上传一张压缩好的 dataURL 图片，返回云端公开 URL
@@ -63,4 +70,18 @@ export async function uploadPhoto(dataUrl) {
     throw new Error(data.detail ? `${msg}（${data.detail}）` : msg)
   }
   return data.url
+}
+
+// 删除照片时顺手删掉云端 Blob 文件，失败也不阻塞用户操作。
+export async function deletePhotoBlob(url) {
+  if (!url || !url.includes('blob.vercel-storage.com')) return
+  try {
+    await fetch(DELETE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    })
+  } catch {
+    // 删除失败仅留下一个孤儿文件，不影响使用
+  }
 }

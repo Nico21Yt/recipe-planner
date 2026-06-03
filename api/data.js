@@ -8,7 +8,7 @@
 import { Redis } from '@upstash/redis'
 
 const KEY = 'recipe-planner:data'
-const EMPTY = { recipes: [], plans: [] }
+const EMPTY = { recipes: [], plans: [], updatedAt: 0, clientId: '' }
 
 function getRedis() {
   const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL
@@ -37,6 +37,8 @@ export default async function handler(req, res) {
       const doc = {
         recipes: Array.isArray(body.recipes) ? body.recipes : [],
         plans: Array.isArray(body.plans) ? body.plans : [],
+        updatedAt: Number(body.updatedAt) || Date.now(),
+        clientId: (body.clientId || '').toString(),
       }
       await redis.set(KEY, doc)
       res.status(200).json({ ok: true })

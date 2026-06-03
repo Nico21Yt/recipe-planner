@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { CATEGORIES, DIFFICULTY, STATUS } from '../storage'
+import { useUI } from '../ui-context'
 
 export default function RecipeForm({ initial, onCancel, onSave }) {
+  const { toast } = useUI()
   const [r, setR] = useState(() => structuredClone(initial))
   const [tagInput, setTagInput] = useState('')
 
@@ -62,7 +64,7 @@ export default function RecipeForm({ initial, onCancel, onSave }) {
   function submit(e) {
     e.preventDefault()
     if (!r.name.trim()) {
-      alert('请填写菜名')
+      toast('请填写菜名', 'error')
       return
     }
     const cleaned = {

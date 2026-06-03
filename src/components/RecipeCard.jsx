@@ -1,6 +1,11 @@
 import { DIFFICULTY, STATUS } from '../storage'
 
-export default function RecipeCard({ recipe, onClick, onStatusChange }) {
+export default function RecipeCard({
+  recipe,
+  onClick,
+  onStatusChange,
+  onToggleFavorite,
+}) {
   const s = STATUS[recipe.status] || STATUS.todo
   const photos = recipe.photos || []
   const cover = photos[photos.length - 1]
@@ -18,7 +23,19 @@ export default function RecipeCard({ recipe, onClick, onStatusChange }) {
         <span className="badge" style={{ background: s.color }}>
           {s.label}
         </span>
-        <span className="cat">{recipe.category}</span>
+        <div className="card-top-right">
+          <span className="cat">{recipe.category}</span>
+          <button
+            className={'star' + (recipe.favorite ? ' on' : '')}
+            title={recipe.favorite ? '取消收藏' : '收藏'}
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleFavorite?.()
+            }}
+          >
+            {recipe.favorite ? '★' : '☆'}
+          </button>
+        </div>
       </div>
       <h3 className="card-title">{recipe.name || '未命名'}</h3>
       <div className="meta">

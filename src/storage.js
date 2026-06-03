@@ -25,6 +25,7 @@ export function emptyRecipe() {
     time: 20,
     servings: 2,
     status: 'todo',
+    favorite: false,
     tags: [],
     ingredients: [{ name: '', amount: '' }],
     steps: [''],

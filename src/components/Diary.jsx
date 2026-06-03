@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
 import { dayOf, formatMD, relativeDay, todayStr, weekdayCN } from '../storage'
+import Lightbox from './Lightbox'
 
 export default function Diary({ plans, recipes, onOpenRecipe }) {
   const today = todayStr()
-  const [lightbox, setLightbox] = useState(null)
+  const [lightbox, setLightbox] = useState(null) // { photos, index }
 
   const entries = useMemo(() => {
     // 所有照片按“天”归类，并记下属于哪道菜
@@ -95,13 +96,15 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
 
                 {entry.photos.length > 0 ? (
                   <div className="photo-grid">
-                    {entry.photos.map((p) => (
+                    {entry.photos.map((p, i) => (
                       <figure key={p.id} className="photo-item">
                         <img
                           src={p.src}
                           alt={p.recipeName}
                           loading="lazy"
-                          onClick={() => setLightbox(p)}
+                          onClick={() =>
+                            setLightbox({ photos: entry.photos, index: i })
+                          }
                         />
                         <figcaption>{p.caption || p.recipeName}</figcaption>
                       </figure>
@@ -117,30 +120,29 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
       </div>
 
       {lightbox && (
-        <div className="lightbox" onClick={() => setLightbox(null)}>
-          <div className="lightbox-inner" onClick={(e) => e.stopPropagation()}>
-            <button className="lightbox-close" onClick={() => setLightbox(null)}>
-              ✕
-            </button>
-            <img src={lightbox.src} alt={lightbox.recipeName} />
+        <Lightbox
+          photos={lightbox.photos}
+          startIndex={lightbox.index}
+          onClose={() => setLightbox(null)}
+          renderBar={(photo) => (
             <div className="lightbox-bar">
               <div className="lightbox-info">
-                <strong>{lightbox.recipeName}</strong>
-                {lightbox.caption && <span>{lightbox.caption}</span>}
+                <strong>{photo.recipeName}</strong>
+                {photo.caption && <span>{photo.caption}</span>}
               </div>
-              <span className="lightbox-date">{formatMD(dayOf(lightbox.date))}</span>
+              <span className="lightbox-date">{formatMD(dayOf(photo.date))}</span>
               <button
                 className="btn ghost small"
                 onClick={() => {
-                  onOpenRecipe(lightbox.recipeId)
+                  onOpenRecipe(photo.recipeId)
                   setLightbox(null)
                 }}
               >
                 查看菜谱
               </button>
             </div>
-          </div>
-        </div>
+          )}
+        />
       )}
     </main>
   )

@@ -44,6 +44,7 @@ export function normalizeRecipe(raw, fallbackName) {
     time: Math.max(1, toInt(r.time, 20)),
     servings: Math.max(1, toInt(r.servings, 2)),
     status: 'todo',
+    favorite: false,
     tags,
     ingredients: ingredients.length ? ingredients : [{ name: '', amount: '' }],
     steps: steps.length ? steps : [''],

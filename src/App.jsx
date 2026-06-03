@@ -7,16 +7,18 @@ import MealPlan from './components/MealPlan'
 import Diary from './components/Diary'
 import Home from './components/Home'
 import { generateRecipe } from './ai'
-import { fetchData, saveData } from './cloud'
+import { fetchData, saveData, CLIENT_ID } from './cloud'
+import { useUI } from './ui-context'
 import './App.css'
 
 const TABS = [
-  { id: 'recipes', label: '菜谱', icon: '📖' },
-  { id: 'plan', label: '明天吃什么', icon: '📅' },
-  { id: 'diary', label: '做饭日记', icon: '📔' },
+  { id: 'recipes', label: '菜谱', short: '菜谱', icon: '📖' },
+  { id: 'plan', label: '明天吃什么', short: '吃什么', icon: '📅' },
+  { id: 'diary', label: '做饭日记', short: '日记', icon: '📔' },
 ]
 
 export default function App() {
+  const { toast, confirm } = useUI()
   const [tab, setTab] = useState('home')
   const [recipes, setRecipes] = useState([])
   const [plans, setPlans] = useState([])
@@ -30,15 +32,19 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(null)
   const [saveState, setSaveState] = useState('idle') // idle | saving | saved | error
+  const [hasUpdate, setHasUpdate] = useState(false) // 云端有他人的新改动
   const loadedRef = useRef(false)
   const saveTimer = useRef(null)
+  const knownUpdatedAt = useRef(0)
 
   const doFetch = useCallback(() => {
     return fetchData()
-      .then(({ recipes, plans }) => {
+      .then(({ recipes, plans, updatedAt }) => {
         setRecipes(recipes)
         setPlans(plans)
         setLoadError(null)
+        knownUpdatedAt.current = updatedAt
+        setHasUpdate(false)
       })
       .catch((e) => setLoadError(e.message))
       .finally(() => {
@@ -64,30 +70,54 @@ export default function App() {
     setSaveState('saving')
     saveTimer.current = setTimeout(() => {
       saveData({ recipes, plans })
-        .then(() => setSaveState('saved'))
+        .then((updatedAt) => {
+          setSaveState('saved')
+          knownUpdatedAt.current = updatedAt
+        })
         .catch(() => setSaveState('error'))
     }, 600)
     return () => saveTimer.current && clearTimeout(saveTimer.current)
   }, [recipes, plans])
 
+  // 定时轮询：发现别人改了云端，就提示刷新（不强行覆盖正在编辑的内容）
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!loadedRef.current) return
+      fetchData()
+        .then((remote) => {
+          if (
+            remote.updatedAt > knownUpdatedAt.current &&
+            remote.clientId !== CLIENT_ID
+          ) {
+            setHasUpdate(true)
+          }
+        })
+        .catch(() => {})
+    }, 25000)
+    return () => clearInterval(id)
+  }, [])
+
   const active = recipes.find((r) => r.id === activeId) || null
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
-    return recipes.filter((r) => {
-      if (filterStatus !== 'all' && r.status !== filterStatus) return false
-      if (filterCategory !== 'all' && r.category !== filterCategory) return false
-      if (!q) return true
-      const hay = [
-        r.name,
-        r.notes,
-        ...(r.tags || []),
-        ...(r.ingredients || []).map((i) => i.name),
-      ]
-        .join(' ')
-        .toLowerCase()
-      return hay.includes(q)
-    })
+    return recipes
+      .filter((r) => {
+        if (filterStatus !== 'all' && r.status !== filterStatus) return false
+        if (filterCategory !== 'all' && r.category !== filterCategory)
+          return false
+        if (!q) return true
+        const hay = [
+          r.name,
+          r.notes,
+          ...(r.tags || []),
+          ...(r.ingredients || []).map((i) => i.name),
+        ]
+          .join(' ')
+          .toLowerCase()
+        return hay.includes(q)
+      })
+      .sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0))
   }, [recipes, search, filterStatus, filterCategory])
 
   const counts = useMemo(() => {
@@ -115,9 +145,10 @@ export default function App() {
     try {
       const recipe = await generateRecipe(dish)
       setRecipes((prev) => [recipe, ...prev])
+      toast('已生成「' + recipe.name + '」', 'success')
       return recipe
     } catch (e) {
-      alert('AI 生成失败：' + e.message)
+      toast('AI 生成失败：' + e.message, 'error', 4000)
       return null
     } finally {
       setGenBusy(false)
@@ -147,10 +178,12 @@ export default function App() {
     openDetail(recipe.id)
   }
 
-  function handleDelete(id) {
-    if (!confirm('确定要删除这道菜吗？')) return
+  async function handleDelete(id) {
+    const ok = await confirm('确定要删除这道菜吗？', { danger: true, confirmText: '删除' })
+    if (!ok) return
     setRecipes((prev) => prev.filter((r) => r.id !== id))
     setView('list')
+    toast('已删除', 'info')
   }
 
   function changeStatus(id, status) {
@@ -201,6 +234,12 @@ export default function App() {
         )}
 
       </header>
+
+      {hasUpdate && (
+        <button className="update-banner" onClick={() => doFetch()}>
+          🔄 有新的改动，点击刷新查看
+        </button>
+      )}
 
       {loading && (
         <main className="content state-screen">
@@ -313,18 +352,22 @@ export default function App() {
             </div>
           </div>
 
-          {filtered.length === 0 ? (
+          {filtered.length === 0 && !genBusy ? (
             <div className="empty">
               <p>还没有菜谱，在上面输入菜名让 AI 帮你生成第一道吧！</p>
             </div>
           ) : (
             <div className="grid">
+              {genBusy && <SkeletonCard />}
               {filtered.map((r) => (
                 <RecipeCard
                   key={r.id}
                   recipe={r}
                   onClick={() => openDetail(r.id)}
                   onStatusChange={(s) => changeStatus(r.id, s)}
+                  onToggleFavorite={() =>
+                    updateRecipe(r.id, { favorite: !r.favorite })
+                  }
                 />
               ))}
             </div>
@@ -340,6 +383,9 @@ export default function App() {
           onDelete={() => handleDelete(active.id)}
           onStatusChange={(s) => changeStatus(active.id, s)}
           onPhotosChange={(photos) => updateRecipe(active.id, { photos })}
+          onToggleFavorite={() =>
+            updateRecipe(active.id, { favorite: !active.favorite })
+          }
         />
       )}
 
@@ -351,6 +397,22 @@ export default function App() {
         />
       )}
 
+      <nav className="bottom-nav">
+        {[{ id: 'home', icon: '🏠', short: '首页' }, ...TABS].map((t) => (
+          <button
+            key={t.id}
+            className={'bn-item' + (tab === t.id ? ' active' : '')}
+            onClick={() => {
+              setTab(t.id)
+              if (t.id === 'recipes') setView('list')
+            }}
+          >
+            <span className="bn-icon">{t.icon}</span>
+            <span className="bn-label">{t.short}</span>
+          </button>
+        ))}
+      </nav>
+
       <footer className="foot">
         🍳 菜谱规划 · 云端共享数据
         {saveState === 'saving' && <span className="sync"> · 保存中…</span>}
@@ -360,6 +422,18 @@ export default function App() {
         )}
       </footer>
     </div>
+  )
+}
+
+function SkeletonCard() {
+  return (
+    <article className="card skeleton">
+      <div className="sk-line sk-badge" />
+      <div className="sk-line sk-title" />
+      <div className="sk-line sk-meta" />
+      <div className="sk-line sk-tag" />
+      <p className="sk-hint">✨ AI 正在生成菜谱…</p>
+    </article>
   )
 }
 
