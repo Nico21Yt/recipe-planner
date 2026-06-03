@@ -1,5 +1,17 @@
-import { useState } from 'react'
-import { DIFFICULTY, STATUS } from '../storage'
+import { useRef, useState } from 'react'
+import { DIFFICULTY, STATUS, dayOf, readPhoto } from '../storage'
+
+function formatDate(iso) {
+  try {
+    return new Date(iso).toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  } catch {
+    return ''
+  }
+}
 
 export default function RecipeDetail({
   recipe,
@@ -7,8 +19,13 @@ export default function RecipeDetail({
   onEdit,
   onDelete,
   onStatusChange,
+  onPhotosChange,
 }) {
   const [checked, setChecked] = useState(() => new Set())
+  const [lightbox, setLightbox] = useState(null) // 放大查看的照片
+  const [busy, setBusy] = useState(false)
+  const photoRef = useRef(null)
+  const photos = recipe.photos || []
 
   function toggle(idx) {
     setChecked((prev) => {
@@ -16,6 +33,43 @@ export default function RecipeDetail({
       next.has(idx) ? next.delete(idx) : next.add(idx)
       return next
     })
+  }
+
+  async function handleAddPhotos(e) {
+    const files = Array.from(e.target.files || [])
+    e.target.value = ''
+    if (files.length === 0) return
+    setBusy(true)
+    try {
+      const added = []
+      for (const file of files) {
+        added.push(await readPhoto(file))
+      }
+      onPhotosChange([...(recipe.photos || []), ...added])
+    } catch (err) {
+      alert('照片处理失败：' + err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function deletePhoto(id) {
+    if (!confirm('删除这张照片？')) return
+    onPhotosChange((recipe.photos || []).filter((p) => p.id !== id))
+    setLightbox(null)
+  }
+
+  function updateCaption(id, caption) {
+    onPhotosChange(
+      (recipe.photos || []).map((p) => (p.id === id ? { ...p, caption } : p)),
+    )
+  }
+
+  function updateDate(id, day) {
+    const iso = day ? day + 'T12:00:00' : new Date().toISOString()
+    onPhotosChange(
+      (recipe.photos || []).map((p) => (p.id === id ? { ...p, date: iso } : p)),
+    )
   }
 
   return (
@@ -103,6 +157,89 @@ export default function RecipeDetail({
           <h3>📝 小贴士 / 心得</h3>
           <p>{recipe.notes}</p>
         </section>
+      )}
+
+      <section className="panel photos-panel">
+        <div className="photos-head">
+          <h3>📸 成品记录</h3>
+          <button
+            className="btn primary small"
+            onClick={() => photoRef.current?.click()}
+            disabled={busy}
+          >
+            {busy ? '处理中…' : '＋ 上传照片'}
+          </button>
+          <input
+            ref={photoRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            multiple
+            hidden
+            onChange={handleAddPhotos}
+          />
+        </div>
+
+        {photos.length === 0 ? (
+          <p className="hint">
+            做过这道菜后，拍张成品照传上来，记录你的进步吧！
+          </p>
+        ) : (
+          <div className="photo-grid">
+            {photos.map((p) => (
+              <figure key={p.id} className="photo-item">
+                <img
+                  src={p.src}
+                  alt={p.caption || recipe.name}
+                  loading="lazy"
+                  onClick={() => setLightbox(p)}
+                />
+                <figcaption>{formatDate(p.date)}</figcaption>
+              </figure>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {lightbox && (
+        <div className="lightbox" onClick={() => setLightbox(null)}>
+          <div className="lightbox-inner" onClick={(e) => e.stopPropagation()}>
+            <button className="lightbox-close" onClick={() => setLightbox(null)}>
+              ✕
+            </button>
+            <img src={lightbox.src} alt={lightbox.caption || recipe.name} />
+            <div className="lightbox-bar">
+              <input
+                className="caption-input"
+                placeholder="加一句话，比如「第一次做，有点咸」"
+                value={lightbox.caption}
+                onChange={(e) => {
+                  const v = e.target.value
+                  setLightbox((lb) => ({ ...lb, caption: v }))
+                  updateCaption(lightbox.id, v)
+                }}
+              />
+              <label className="lightbox-date-edit" title="拍摄/做菜日期，日记按它归类">
+                📅
+                <input
+                  type="date"
+                  value={dayOf(lightbox.date)}
+                  onChange={(e) => {
+                    const day = e.target.value
+                    setLightbox((lb) => ({ ...lb, date: day + 'T12:00:00' }))
+                    updateDate(lightbox.id, day)
+                  }}
+                />
+              </label>
+              <button
+                className="btn danger small"
+                onClick={() => deletePhoto(lightbox.id)}
+              >
+                删除
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   )

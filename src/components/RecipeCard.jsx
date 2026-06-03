@@ -2,8 +2,18 @@ import { DIFFICULTY, STATUS } from '../storage'
 
 export default function RecipeCard({ recipe, onClick, onStatusChange }) {
   const s = STATUS[recipe.status] || STATUS.todo
+  const photos = recipe.photos || []
+  const cover = photos[photos.length - 1]
   return (
     <article className="card" onClick={onClick}>
+      {cover && (
+        <div className="card-cover">
+          <img src={cover.src} alt={recipe.name} loading="lazy" />
+          {photos.length > 1 && (
+            <span className="cover-count">📷 {photos.length}</span>
+          )}
+        </div>
+      )}
       <div className="card-top">
         <span className="badge" style={{ background: s.color }}>
           {s.label}

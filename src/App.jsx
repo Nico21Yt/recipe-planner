@@ -3,29 +3,56 @@ import {
   CATEGORIES,
   STATUS,
   emptyRecipe,
-  exportRecipes,
-  importRecipes,
+  loadPlans,
   loadRecipes,
-  resetToRepo,
+  savePlans,
   saveRecipes,
 } from './storage'
 import RecipeCard from './components/RecipeCard'
 import RecipeDetail from './components/RecipeDetail'
 import RecipeForm from './components/RecipeForm'
+import MealPlan from './components/MealPlan'
+import Diary from './components/Diary'
+import Home from './components/Home'
+import { generateRecipe } from './ai'
 import './App.css'
 
+const TABS = [
+  { id: 'recipes', label: '菜谱', icon: '📖' },
+  { id: 'plan', label: '明天吃什么', icon: '📅' },
+  { id: 'diary', label: '做饭日记', icon: '📔' },
+]
+
 export default function App() {
+  const [tab, setTab] = useState('home')
   const [recipes, setRecipes] = useState(() => loadRecipes())
+  const [plans, setPlans] = useState(() => loadPlans())
   const [view, setView] = useState('list') // list | detail | form
   const [activeId, setActiveId] = useState(null)
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterCategory, setFilterCategory] = useState('all')
-  const importRef = useRef(null)
+  const [genInput, setGenInput] = useState('')
+  const [genBusy, setGenBusy] = useState(false)
+  const quotaWarned = useRef(false)
 
   useEffect(() => {
-    saveRecipes(recipes)
+    const res = saveRecipes(recipes)
+    if (!res.ok) {
+      if (!quotaWarned.current) {
+        quotaWarned.current = true
+        alert(
+          '浏览器存储空间已满，最新的照片可能没保存上。\n建议先「导出 JSON」备份，或删掉一些旧照片。',
+        )
+      }
+    } else {
+      quotaWarned.current = false
+    }
   }, [recipes])
+
+  useEffect(() => {
+    savePlans(plans)
+  }, [plans])
 
   const active = recipes.find((r) => r.id === activeId) || null
 
@@ -60,9 +87,33 @@ export default function App() {
     setView('detail')
   }
 
-  function openNew() {
-    setActiveId(null)
-    setView('form')
+  function openRecipeFromTab(id) {
+    setTab('recipes')
+    openDetail(id)
+  }
+
+  async function handleGenerate(name) {
+    const dish = name.trim()
+    if (!dish || genBusy) return null
+    setGenBusy(true)
+    try {
+      const recipe = await generateRecipe(dish)
+      setRecipes((prev) => [recipe, ...prev])
+      return recipe
+    } catch (e) {
+      alert('AI 生成失败：' + e.message)
+      return null
+    } finally {
+      setGenBusy(false)
+    }
+  }
+
+  async function generateAndOpen() {
+    const r = await handleGenerate(genInput)
+    if (r) {
+      setGenInput('')
+      openDetail(r.id)
+    }
   }
 
   function openEdit(id) {
@@ -92,60 +143,106 @@ export default function App() {
     )
   }
 
-  async function handleImport(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    try {
-      const data = await importRecipes(file)
-      setRecipes(data)
-      alert(`导入成功，共 ${data.length} 道菜`)
-    } catch (err) {
-      alert('导入失败：' + err.message)
-    }
-    e.target.value = ''
-  }
-
-  function handleReset() {
-    if (!confirm('放弃本地修改，恢复为仓库(git)里的版本？')) return
-    setRecipes(resetToRepo())
-    setView('list')
+  function updateRecipe(id, patch) {
+    setRecipes((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+    )
   }
 
   return (
     <div className="app">
       <header className="topbar">
-        <div className="brand" onClick={() => setView('list')}>
+        <div
+          className="brand"
+          onClick={() => {
+            setTab('home')
+            setView('list')
+          }}
+        >
           <span className="logo">🍳</span>
           <div>
             <h1>菜谱规划</h1>
             <p>给新手厨师的备菜清单</p>
           </div>
         </div>
-        <div className="topbar-actions">
-          <button className="btn ghost" onClick={() => exportRecipes(recipes)}>
-            导出 JSON
-          </button>
-          <button className="btn ghost" onClick={() => importRef.current?.click()}>
-            导入
-          </button>
-          <button className="btn ghost" onClick={handleReset} title="恢复为 git 仓库里的 recipes.json">
-            恢复仓库版
-          </button>
-          <button className="btn primary" onClick={openNew}>
-            ＋ 新菜谱
-          </button>
-          <input
-            ref={importRef}
-            type="file"
-            accept="application/json"
-            hidden
-            onChange={handleImport}
-          />
-        </div>
+
+        {tab !== 'home' && (
+          <nav className="tabs">
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                className={'tab' + (tab === t.id ? ' active' : '')}
+                onClick={() => {
+                  setTab(t.id)
+                  if (t.id === 'recipes') setView('list')
+                }}
+              >
+                <span className="tab-icon">{t.icon}</span>
+                {t.label}
+              </button>
+            ))}
+          </nav>
+        )}
+
       </header>
 
-      {view === 'list' && (
+      {tab === 'home' && (
+        <Home
+          recipes={recipes}
+          plans={plans}
+          onPick={(id) => {
+            setTab(id)
+            if (id === 'recipes') setView('list')
+          }}
+        />
+      )}
+
+      {tab === 'plan' && (
+        <MealPlan
+          plans={plans}
+          recipes={recipes}
+          onChange={setPlans}
+          onOpenRecipe={openRecipeFromTab}
+          onGenerateRecipe={handleGenerate}
+        />
+      )}
+
+      {tab === 'diary' && (
+        <Diary plans={plans} recipes={recipes} onOpenRecipe={openRecipeFromTab} />
+      )}
+
+      {tab === 'recipes' && view === 'list' && (
         <main className="content">
+          <div className="section-head">
+            <div>
+              <h2>我的菜谱</h2>
+              <p className="section-sub">输入菜名，AI 帮你生成新手菜谱。</p>
+            </div>
+          </div>
+
+          <div className="ai-bar">
+            <input
+              className="dish-input"
+              placeholder="想做什么菜？输入菜名，如 麻婆豆腐…"
+              value={genInput}
+              disabled={genBusy}
+              onChange={(e) => setGenInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  generateAndOpen()
+                }
+              }}
+            />
+            <button
+              className="btn primary"
+              onClick={generateAndOpen}
+              disabled={genBusy || !genInput.trim()}
+            >
+              {genBusy ? 'AI 生成中…' : '✨ AI 生成菜谱'}
+            </button>
+          </div>
+
           <div className="toolbar">
             <input
               className="search"
@@ -186,10 +283,7 @@ export default function App() {
 
           {filtered.length === 0 ? (
             <div className="empty">
-              <p>还没有菜谱</p>
-              <button className="btn primary" onClick={openNew}>
-                添加第一道菜
-              </button>
+              <p>还没有菜谱，在上面输入菜名让 AI 帮你生成第一道吧！</p>
             </div>
           ) : (
             <div className="grid">
@@ -206,17 +300,18 @@ export default function App() {
         </main>
       )}
 
-      {view === 'detail' && active && (
+      {tab === 'recipes' && view === 'detail' && active && (
         <RecipeDetail
           recipe={active}
           onBack={() => setView('list')}
           onEdit={() => openEdit(active.id)}
           onDelete={() => handleDelete(active.id)}
           onStatusChange={(s) => changeStatus(active.id, s)}
+          onPhotosChange={(photos) => updateRecipe(active.id, { photos })}
         />
       )}
 
-      {view === 'form' && (
+      {tab === 'recipes' && view === 'form' && (
         <RecipeForm
           initial={active || emptyRecipe()}
           onCancel={() => setView(active ? 'detail' : 'list')}
@@ -225,8 +320,7 @@ export default function App() {
       )}
 
       <footer className="foot">
-        数据保存在浏览器本地。点「导出 JSON」下载后替换仓库里的{' '}
-        <code>src/data/recipes.json</code> 并提交，即可通过 git 同步。
+        🍳 菜谱规划 · 数据保存在你的浏览器本地
       </footer>
     </div>
   )

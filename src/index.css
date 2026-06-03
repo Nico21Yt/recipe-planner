@@ -1,13 +1,13 @@
 :root {
-  --bg: #faf7f2;
+  --bg: #f3f8f1;
   --surface: #ffffff;
-  --border: #ece5da;
-  --text: #2c2722;
-  --muted: #8a8178;
-  --primary: #e8682c;
-  --primary-dark: #cf551c;
+  --border: #dfe9db;
+  --text: #25302a;
+  --muted: #78867d;
+  --primary: #3da35d;
+  --primary-dark: #2f8a4c;
   --radius: 14px;
-  --shadow: 0 4px 20px rgba(70, 50, 30, 0.06);
+  --shadow: 0 4px 20px rgba(40, 70, 45, 0.06);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
     'Microsoft YaHei', Roboto, sans-serif;
   color: var(--text);
@@ -39,5 +39,5 @@ textarea {
 }
 
 ::selection {
-  background: rgba(232, 104, 44, 0.2);
+  background: rgba(61, 163, 93, 0.2);
 }

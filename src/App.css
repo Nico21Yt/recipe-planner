@@ -86,6 +86,10 @@
   border-color: #ef4444;
   color: #ef4444;
 }
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 
 /* ---------- Content ---------- */
 .content {
@@ -94,6 +98,29 @@
   max-width: 1080px;
   margin: 0 auto;
   padding: 24px;
+}
+
+/* ---------- AI generate bar ---------- */
+.ai-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.ai-bar .dish-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.ai-bar .btn {
+  white-space: nowrap;
+}
+.ai-bar .btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 /* ---------- Toolbar / filters ---------- */
@@ -166,7 +193,7 @@
 }
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 28px rgba(70, 50, 30, 0.12);
+  box-shadow: 0 10px 28px rgba(40, 70, 45, 0.12);
 }
 .card-top {
   display: flex;
@@ -207,7 +234,7 @@
 }
 .tag {
   font-size: 12px;
-  background: rgba(232, 104, 44, 0.1);
+  background: rgba(61, 163, 93, 0.1);
   color: var(--primary-dark);
   padding: 3px 9px;
   border-radius: 999px;
@@ -464,6 +491,462 @@
   border: 1px solid var(--border);
 }
 
+/* ---------- Home / landing ---------- */
+.home {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 160px);
+}
+.home-hero {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.home-hero h2 {
+  margin: 0 0 8px;
+  font-size: 30px;
+}
+.home-hero p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 240px));
+  gap: 20px;
+  width: 100%;
+  max-width: 800px;
+}
+.home-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 32px 20px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.home-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary);
+  box-shadow: 0 14px 34px rgba(40, 70, 45, 0.14);
+}
+.home-icon {
+  font-size: 46px;
+  line-height: 1;
+}
+.home-card h3 {
+  margin: 6px 0 0;
+  font-size: 19px;
+  color: var(--text);
+}
+.home-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.home-stat {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--primary-dark);
+  background: rgba(61, 163, 93, 0.1);
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+/* ---------- Tabs ---------- */
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.tab:hover {
+  color: var(--text);
+}
+.tab.active {
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: 0 1px 4px rgba(40, 70, 45, 0.1);
+  font-weight: 600;
+}
+.tab-icon {
+  font-size: 15px;
+}
+
+/* ---------- Section head ---------- */
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.section-head h2 {
+  margin: 0;
+  font-size: 24px;
+}
+.section-sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ---------- Meal plan ---------- */
+.day-switch {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 20px;
+}
+.day-tab {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 9px 22px;
+  border-radius: 9px;
+  font-size: 14px;
+  transition: all 0.15s ease;
+}
+.day-tab.active {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+.plan-card.single {
+  max-width: 560px;
+}
+.add-day {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.date-input,
+.dish-input {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  outline: none;
+}
+.date-input:focus,
+.dish-input:focus {
+  border-color: var(--primary);
+}
+.plan-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.plan-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+}
+.plan-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.plan-date {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.plan-date .rel {
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+.plan-date .md {
+  font-size: 18px;
+  font-weight: 600;
+}
+.plan-date .wd {
+  font-size: 13px;
+  color: var(--muted);
+}
+.dish-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dish {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--bg);
+  border-radius: 9px;
+  padding: 8px 10px;
+}
+.dish-name {
+  font-size: 14px;
+}
+.dish-name.linked {
+  cursor: pointer;
+  color: var(--primary-dark);
+}
+.dish-name.linked:hover {
+  text-decoration: underline;
+}
+.dish-add {
+  display: flex;
+  gap: 8px;
+}
+.dish-add .dish-input {
+  flex: 1;
+  background: var(--bg);
+}
+
+/* ---------- Diary timeline ---------- */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.diary-day {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+.diary-date {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-right: 1px solid var(--border);
+  padding-right: 12px;
+}
+.diary-md {
+  font-size: 20px;
+  font-weight: 700;
+}
+.diary-wd {
+  font-size: 13px;
+  color: var(--muted);
+}
+.diary-rel {
+  font-size: 12px;
+  color: var(--primary);
+}
+.diary-dishes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.dish-chip {
+  background: rgba(61, 163, 93, 0.1);
+  color: var(--primary-dark);
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+.dish-chip.linked {
+  cursor: pointer;
+}
+.dish-chip.linked:hover {
+  background: rgba(61, 163, 93, 0.2);
+}
+
+/* ---------- Lightbox extras ---------- */
+.lightbox-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  font-size: 13px;
+}
+.lightbox-info span {
+  color: var(--muted);
+}
+.lightbox-date-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.lightbox-date-edit input {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 8px;
+  background: var(--bg);
+  outline: none;
+}
+
+/* ---------- Card cover photo ---------- */
+.card-cover {
+  position: relative;
+  margin: -16px -16px 2px;
+  height: 150px;
+  overflow: hidden;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cover-count {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+/* ---------- Photos panel ---------- */
+.photos-panel {
+  margin-top: 16px;
+}
+.photos-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.photos-head h3 {
+  margin: 0;
+  flex: 1;
+}
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+.photo-item {
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+.photo-item img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+}
+.photo-item img:hover {
+  transform: scale(1.04);
+}
+.photo-item figcaption {
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---------- Lightbox ---------- */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(20, 16, 12, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.lightbox-inner {
+  position: relative;
+  max-width: 760px;
+  width: 100%;
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.lightbox-inner img {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  display: block;
+  background: #000;
+}
+.lightbox-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 16px;
+}
+.lightbox-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  flex-wrap: wrap;
+}
+.caption-input {
+  flex: 1;
+  min-width: 160px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  outline: none;
+}
+.caption-input:focus {
+  border-color: var(--primary);
+  background: var(--surface);
+}
+.lightbox-date {
+  font-size: 12px;
+  color: var(--muted);
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 720px) {
   .detail-grid {
@@ -471,5 +954,35 @@
   }
   .content {
     padding: 16px;
+  }
+  .tabs {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .tab {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  .diary-day {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .diary-date {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 8px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0 0 8px;
+  }
+  .home-grid {
+    grid-template-columns: 1fr;
+    max-width: 360px;
+  }
+  .home {
+    min-height: calc(100vh - 200px);
   }
 }
