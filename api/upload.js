@@ -6,13 +6,24 @@
 
 import { put } from '@vercel/blob'
 
+// Vercel 给 Blob 连接生成的 token 可能带自定义前缀（如 xxx_READ_WRITE_TOKEN），
+// 这里不依赖固定变量名：Blob token 都以 vercel_blob_rw_ 开头，按特征找出来。
+function getBlobToken() {
+  if (process.env.BLOB_READ_WRITE_TOKEN) return process.env.BLOB_READ_WRITE_TOKEN
+  for (const v of Object.values(process.env)) {
+    if (typeof v === 'string' && v.startsWith('vercel_blob_rw_')) return v
+  }
+  return null
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: '只支持 POST' })
     return
   }
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    res.status(500).json({ error: '服务器未配置 BLOB_READ_WRITE_TOKEN' })
+  const blobToken = getBlobToken()
+  if (!blobToken) {
+    res.status(500).json({ error: '服务器未配置 Blob token（请确认 Blob 已连接并 Redeploy）' })
     return
   }
 
@@ -38,6 +49,7 @@ export default async function handler(req, res) {
     const blob = await put(name, buffer, {
       access: 'public',
       contentType,
+      token: blobToken,
     })
     res.status(200).json({ url: blob.url })
   } catch (e) {
