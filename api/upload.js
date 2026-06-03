@@ -6,8 +6,9 @@
 
 import { put } from '@vercel/blob'
 
-// Vercel 给 Blob 连接生成的 token 可能带自定义前缀（如 xxx_READ_WRITE_TOKEN），
-// 这里不依赖固定变量名：Blob token 都以 vercel_blob_rw_ 开头，按特征找出来。
+// Blob 鉴权两种方式都支持：
+// 1) 静态 token（BLOB_READ_WRITE_TOKEN 或以 vercel_blob_rw_ 开头的变量）
+// 2) 新版 OIDC（仅有 BLOB_STORE_ID，运行时自动注入 OIDC 凭证）——无需 token
 function getBlobToken() {
   if (process.env.BLOB_READ_WRITE_TOKEN) return process.env.BLOB_READ_WRITE_TOKEN
   for (const v of Object.values(process.env)) {
@@ -22,10 +23,6 @@ export default async function handler(req, res) {
     return
   }
   const blobToken = getBlobToken()
-  if (!blobToken) {
-    res.status(500).json({ error: '服务器未配置 Blob token（请确认 Blob 已连接并 Redeploy）' })
-    return
-  }
 
   const dataUrl = (req.body?.dataUrl || '').toString()
   const m = dataUrl.match(/^data:(image\/\w+);base64,(.+)$/)
@@ -46,11 +43,9 @@ export default async function handler(req, res) {
 
   try {
     const name = `photos/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
-    const blob = await put(name, buffer, {
-      access: 'public',
-      contentType,
-      token: blobToken,
-    })
+    const opts = { access: 'public', contentType }
+    if (blobToken) opts.token = blobToken // 没有静态 token 时走 OIDC
+    const blob = await put(name, buffer, opts)
     res.status(200).json({ url: blob.url })
   } catch (e) {
     res.status(500).json({ error: '上传失败', detail: String(e).slice(0, 300) })
