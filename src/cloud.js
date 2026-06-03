@@ -59,7 +59,8 @@ export async function uploadPhoto(dataUrl) {
     // ignore
   }
   if (!resp.ok || !data.url) {
-    throw new Error(data.error || `上传失败（${resp.status}）`)
+    const msg = data.error || `上传失败（${resp.status}）`
+    throw new Error(data.detail ? `${msg}（${data.detail}）` : msg)
   }
   return data.url
 }
