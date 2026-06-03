@@ -306,7 +306,7 @@ export default function App() {
               }}
             />
             <button
-              className="btn primary"
+              className="btn accent"
               onClick={generateAndOpen}
               disabled={genBusy || !genInput.trim()}
             >

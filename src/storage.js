@@ -1,9 +1,9 @@
 export const CATEGORIES = ['家常菜', '汤羹', '主食', '甜点', '凉菜', '早餐', '其他']
 
 export const STATUS = {
-  todo: { label: '想试', color: '#f59e0b' },
-  doing: { label: '正在做', color: '#3b82f6' },
-  done: { label: '做过', color: '#22c55e' },
+  todo: { label: '想试', color: '#cf9a2c' },
+  doing: { label: '正在做', color: '#c5562a' },
+  done: { label: '做过', color: '#3c6e47' },
 }
 
 export const DIFFICULTY = {

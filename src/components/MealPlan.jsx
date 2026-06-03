@@ -220,7 +220,7 @@ export default function MealPlan({
             )}
           </div>
           <button
-            className="btn primary small"
+            className={'btn small ' + (isNewDish ? 'accent' : 'primary')}
             onClick={() => addDish()}
             disabled={busy || !input.trim()}
           >

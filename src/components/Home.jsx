@@ -44,12 +44,21 @@ export default function Home({ recipes, plans, onPick }) {
   return (
     <main className="content home">
       <div className="home-hero">
-        <h2>今天想做点什么？</h2>
-        <p>选一个开始吧 👇</p>
+        <span className="home-kicker">灶感 · 新手厨房手记</span>
+        <h2>
+          今天想做点<em>什么</em>？
+        </h2>
+        <p>选一个开始吧</p>
       </div>
       <div className="home-grid">
-        {options.map((o) => (
-          <button key={o.id} className="home-card" onClick={() => onPick(o.id)}>
+        {options.map((o, i) => (
+          <button
+            key={o.id}
+            className="home-card"
+            style={{ '--i': i }}
+            onClick={() => onPick(o.id)}
+          >
+            <span className="home-no">0{i + 1}</span>
             <span className="home-icon">{o.icon}</span>
             <h3>{o.title}</h3>
             <p className="home-desc">{o.desc}</p>

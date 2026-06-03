@@ -1,7 +1,7 @@
 // 极简 Service Worker：缓存 app 静态外壳，让二次打开更快、弱网也能进入。
 // 数据接口（/api/*）始终走网络，保证多人共享数据是最新的。
-const CACHE = 'recipe-planner-v1'
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png']
+const CACHE = 'recipe-planner-v2'
+const SHELL = ['./manifest.webmanifest', './icon-192.png', './icon-512.png']
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()))
@@ -23,7 +23,13 @@ self.addEventListener('fetch', (e) => {
   // 接口与跨域请求不缓存，始终走网络
   if (url.pathname.startsWith('/api/') || url.origin !== self.location.origin) return
 
-  // 静态资源：缓存优先，命中后台更新
+  // HTML 页面（导航请求）：网络优先，避免部署后引用到旧的资源文件
+  if (req.mode === 'navigate') {
+    e.respondWith(fetch(req).catch(() => caches.match('./index.html')))
+    return
+  }
+
+  // 其它静态资源：缓存优先，命中后后台更新
   e.respondWith(
     caches.match(req).then((cached) => {
       const fetched = fetch(req)

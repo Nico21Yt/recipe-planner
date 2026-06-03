@@ -1,16 +1,48 @@
+/* ============================================================
+   灶感 · Warm editorial cookbook
+   Cream paper + ink, herb-green & terracotta accents,
+   Fraunces / Songti serif display + Hanken Grotesk body.
+   ============================================================ */
 :root {
-  --bg: #f3f8f1;
-  --surface: #ffffff;
-  --border: #dfe9db;
-  --text: #25302a;
-  --muted: #78867d;
-  --primary: #3da35d;
-  --primary-dark: #2f8a4c;
-  --radius: 14px;
-  --shadow: 0 4px 20px rgba(40, 70, 45, 0.06);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
-    'Microsoft YaHei', Roboto, sans-serif;
-  color: var(--text);
+  /* paper & ink — green-dominant sage paper */
+  --paper: #dbe8cd;
+  --paper-2: #cfdfbe;
+  --surface: #fbfbef;
+  --ink: #1f291d;
+  --ink-2: #3d4a37;
+  --muted: #5d6b52;
+
+  /* accents */
+  --green: #3a6b43;
+  --green-deep: #2a5232;
+  --green-soft: rgba(58, 107, 67, 0.16);
+  --terracotta: #c5562a;
+  --terracotta-deep: #a4421d;
+  --terracotta-soft: rgba(197, 86, 42, 0.13);
+  --gold: #cf9a2c;
+
+  /* lines & depth */
+  --line: #bfd0ac;
+  --line-strong: #a4b98e;
+  --radius: 16px;
+  --shadow: 0 1px 0 rgba(30, 50, 25, 0.05),
+    0 18px 34px -22px rgba(30, 50, 25, 0.45);
+
+  /* legacy aliases so existing rules keep working */
+  --bg: var(--paper);
+  --text: var(--ink);
+  --border: var(--line);
+  --primary: var(--green);
+  --primary-dark: var(--green-deep);
+
+  --font-display: 'Fraunces', 'Songti SC', 'STSong', 'Georgia', serif;
+  --font-body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+
+  font-family: var(--font-body);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.6;
 }
 
 * {
@@ -21,8 +53,51 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
+  color: var(--ink);
+  background-color: var(--paper);
+  /* herb-green atmospheric wash with a faint terracotta warmth */
+  background-image: radial-gradient(
+      66% 54% at 8% -4%,
+      rgba(42, 82, 50, 0.22) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      60% 50% at 102% 4%,
+      rgba(58, 107, 67, 0.2) 0%,
+      transparent 58%
+    ),
+    radial-gradient(
+      48% 42% at 88% 100%,
+      rgba(197, 86, 42, 0.08) 0%,
+      transparent 60%
+    );
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* paper grain overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  font-optical-sizing: auto;
 }
 
 button {
@@ -34,10 +109,25 @@ input,
 select,
 textarea {
   font-family: inherit;
-  font-size: 14px;
-  color: var(--text);
+  font-size: 15px;
+  color: var(--ink);
 }
 
 ::selection {
-  background: rgba(61, 163, 93, 0.2);
+  background: var(--terracotta);
+  color: #fff;
+}
+
+/* warm scrollbar */
+* {
+  scrollbar-color: var(--line-strong) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 999px;
+  border: 2px solid var(--paper);
 }
