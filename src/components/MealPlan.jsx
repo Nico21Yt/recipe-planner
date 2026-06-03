@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   addDays,
   emptyPlan,
@@ -20,6 +20,20 @@ export default function MealPlan({
   const [which, setWhich] = useState('tomorrow')
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
+  const [open, setOpen] = useState(false)
+  const comboRef = useRef(null)
+  const inputRef = useRef(null)
+
+  // 点击下拉框外面就收起
+  useEffect(() => {
+    function onDocClick(e) {
+      if (comboRef.current && !comboRef.current.contains(e.target)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
+  }, [])
 
   const targetDate = which === 'today' ? today : addDays(today, 1)
   const plan = plans.find((p) => p.date === targetDate) || null
@@ -41,18 +55,26 @@ export default function MealPlan({
   const match = recipes.find((r) => r.name === input.trim())
   const isNewDish = input.trim() && !match
 
-  async function addDish() {
-    const name = input.trim()
+  const query = input.trim().toLowerCase()
+  const options = recipes.filter(
+    (r) => !query || r.name.toLowerCase().includes(query),
+  )
+
+  async function addDish(nameArg) {
+    const name = (nameArg ?? input).trim()
     if (!name || busy) return
 
-    if (match) {
-      appendDish(plans, makeDish(name, match.id))
+    const m = recipes.find((r) => r.name === name)
+    if (m) {
+      appendDish(plans, makeDish(name, m.id))
       setInput('')
+      setOpen(false)
       return
     }
 
     // 新菜：用 AI 生成菜谱、加入菜谱库，再把这道菜排进计划
     setBusy(true)
+    setOpen(false)
     try {
       const recipe = await onGenerateRecipe(name)
       appendDish(plans, makeDish(name, recipe ? recipe.id : null))
@@ -132,28 +154,74 @@ export default function MealPlan({
         )}
 
         <div className="dish-add">
-          <input
-            list="recipe-options"
-            className="dish-input"
-            placeholder="从菜谱选，或输入新菜名…"
-            value={input}
-            disabled={busy}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                addDish()
-              }
-            }}
-          />
-          <datalist id="recipe-options">
-            {recipes.map((r) => (
-              <option key={r.id} value={r.name} />
-            ))}
-          </datalist>
+          <div className="combo" ref={comboRef}>
+            <input
+              ref={inputRef}
+              className="dish-input"
+              placeholder="从菜谱选，或输入新菜名…"
+              value={input}
+              disabled={busy}
+              onChange={(e) => {
+                setInput(e.target.value)
+                setOpen(true)
+              }}
+              onFocus={() => setOpen(true)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  addDish()
+                } else if (e.key === 'Escape') {
+                  setOpen(false)
+                }
+              }}
+            />
+            <button
+              type="button"
+              className={'combo-arrow' + (open ? ' open' : '')}
+              disabled={busy}
+              aria-label="展开菜谱列表"
+              onClick={() => {
+                setOpen((v) => !v)
+                inputRef.current?.focus()
+              }}
+            >
+              ▾
+            </button>
+
+            {open && (
+              <ul className="combo-menu">
+                {options.length > 0 ? (
+                  options.map((r) => (
+                    <li key={r.id}>
+                      <button
+                        type="button"
+                        className="combo-item"
+                        onClick={() => addDish(r.name)}
+                      >
+                        🍽 {r.name}
+                      </button>
+                    </li>
+                  ))
+                ) : (
+                  <li className="combo-empty">菜谱里没有匹配的菜</li>
+                )}
+                {isNewDish && (
+                  <li>
+                    <button
+                      type="button"
+                      className="combo-item new"
+                      onClick={() => addDish()}
+                    >
+                      ✨ 用 AI 生成「{input.trim()}」
+                    </button>
+                  </li>
+                )}
+              </ul>
+            )}
+          </div>
           <button
             className="btn primary small"
-            onClick={addDish}
+            onClick={() => addDish()}
             disabled={busy || !input.trim()}
           >
             {busy ? 'AI 生成中…' : isNewDish ? '✨ 生成并添加' : '添加'}

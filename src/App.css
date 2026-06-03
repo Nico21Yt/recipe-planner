@@ -946,6 +946,78 @@
   background: var(--bg);
 }
 
+/* ---------- Combobox (从菜谱选) ---------- */
+.combo {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+.combo .dish-input {
+  flex: 1;
+  width: 100%;
+  padding-right: 40px;
+}
+.combo-arrow {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  border-radius: 8px;
+  transition: transform 0.18s ease;
+}
+.combo-arrow.open {
+  transform: translateY(-50%) rotate(180deg);
+}
+.combo-arrow:hover {
+  background: var(--border);
+}
+.combo-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(40, 70, 45, 0.14);
+  max-height: 260px;
+  overflow-y: auto;
+}
+.combo-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--text);
+  cursor: pointer;
+}
+.combo-item:hover {
+  background: var(--bg);
+}
+.combo-item.new {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+.combo-empty {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
 /* ---------- Diary timeline ---------- */
 .timeline {
   display: flex;
