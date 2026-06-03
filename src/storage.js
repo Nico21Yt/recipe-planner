@@ -6,12 +6,6 @@ export const STATUS = {
   done: { label: '做过', color: '#3c6e47' },
 }
 
-export const DIFFICULTY = {
-  1: '简单',
-  2: '适中',
-  3: '有挑战',
-}
-
 function uid() {
   return 'r_' + Math.random().toString(36).slice(2, 9)
 }
@@ -21,9 +15,6 @@ export function emptyRecipe() {
     id: uid(),
     name: '',
     category: '家常菜',
-    difficulty: 1,
-    time: 20,
-    servings: 2,
     status: 'todo',
     favorite: false,
     tags: [],

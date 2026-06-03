@@ -1,4 +1,4 @@
-import { DIFFICULTY, STATUS } from '../storage'
+import { STATUS } from '../storage'
 
 export default function RecipeCard({
   recipe,
@@ -38,11 +38,6 @@ export default function RecipeCard({
         </div>
       </div>
       <h3 className="card-title">{recipe.name || '未命名'}</h3>
-      <div className="meta">
-        <span>⏱ {recipe.time} 分钟</span>
-        <span>🍽 {recipe.servings} 人份</span>
-        <span>🔥 {DIFFICULTY[recipe.difficulty]}</span>
-      </div>
       {recipe.tags?.length > 0 && (
         <div className="tags">
           {recipe.tags.map((t) => (

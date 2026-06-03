@@ -1121,11 +1121,24 @@
   padding: 9px 12px;
 }
 .dish-name {
-  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.dish-name .dish-glyph {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  opacity: 0.65;
 }
 .dish-name.linked {
   cursor: pointer;
-  color: var(--primary-dark);
+  color: var(--green-deep);
 }
 .dish-name.linked:hover {
   text-decoration: underline;
@@ -1149,6 +1162,16 @@
   flex: 1;
   width: 100%;
   padding-right: 40px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.combo .dish-input::placeholder {
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--muted);
 }
 .combo-arrow {
   position: absolute;
@@ -1188,23 +1211,38 @@
   overflow-y: auto;
 }
 .combo-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   text-align: left;
   border: none;
   background: transparent;
   padding: 10px 12px;
   border-radius: 8px;
-  font-size: 15px;
-  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
   cursor: pointer;
+}
+.combo-item .dish-glyph {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  opacity: 0.65;
+  flex-shrink: 0;
 }
 .combo-item:hover {
   background: var(--bg);
 }
 .combo-item.new {
-  color: var(--terracotta-deep);
+  font-family: var(--font-body);
+  font-size: 14px;
   font-weight: 700;
+  letter-spacing: 0;
+  color: var(--terracotta-deep);
 }
 .combo-item.new:hover {
   background: var(--terracotta-soft);

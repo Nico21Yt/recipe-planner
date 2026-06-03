@@ -140,7 +140,9 @@ export default function MealPlan({
                   onClick={() => d.recipeId && onOpenRecipe(d.recipeId)}
                   title={d.recipeId ? '查看菜谱' : '自定义菜（菜谱里还没有）'}
                 >
-                  {d.recipeId ? '🍽 ' : '✎ '}
+                  <span className="dish-glyph" aria-hidden>
+                    {d.recipeId ? '🍽' : '✎'}
+                  </span>
                   {d.name}
                 </span>
                 <button className="btn icon" onClick={() => removeDish(d.id)}>
@@ -198,7 +200,10 @@ export default function MealPlan({
                         className="combo-item"
                         onClick={() => addDish(r.name)}
                       >
-                        🍽 {r.name}
+                        <span className="dish-glyph" aria-hidden>
+                          🍽
+                        </span>
+                        {r.name}
                       </button>
                     </li>
                   ))

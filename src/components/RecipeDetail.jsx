@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { DIFFICULTY, STATUS, dayOf, readPhoto } from '../storage'
+import { STATUS, dayOf, readPhoto } from '../storage'
 import { uploadPhoto, deletePhotoBlob } from '../cloud'
 import { useUI } from '../ui-context'
 import Lightbox from './Lightbox'
@@ -112,9 +112,6 @@ export default function RecipeDetail({
         </div>
         <div className="meta big">
           <span className="cat">{recipe.category}</span>
-          <span>⏱ {recipe.time} 分钟</span>
-          <span>🍽 {recipe.servings} 人份</span>
-          <span>🔥 {DIFFICULTY[recipe.difficulty]}</span>
         </div>
         <div className="status-row">
           {Object.entries(STATUS).map(([key, st]) => (

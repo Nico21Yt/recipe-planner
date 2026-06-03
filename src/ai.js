@@ -8,15 +8,9 @@ function uid() {
   return 'r_' + Math.random().toString(36).slice(2, 9)
 }
 
-function toInt(value, fallback) {
-  const n = parseInt(value, 10)
-  return Number.isFinite(n) ? n : fallback
-}
-
 // 把 AI 返回的数据收拾成我们 app 用的标准菜谱结构
 export function normalizeRecipe(raw, fallbackName) {
   const r = raw || {}
-  const difficulty = Math.min(3, Math.max(1, toInt(r.difficulty, 1)))
 
   const ingredients = Array.isArray(r.ingredients)
     ? r.ingredients
@@ -40,9 +34,6 @@ export function normalizeRecipe(raw, fallbackName) {
     id: uid(),
     name: (r.name || fallbackName || '').toString().trim() || fallbackName,
     category: CATEGORIES.includes(r.category) ? r.category : '家常菜',
-    difficulty,
-    time: Math.max(1, toInt(r.time, 20)),
-    servings: Math.max(1, toInt(r.servings, 2)),
     status: 'todo',
     favorite: false,
     tags,

@@ -414,7 +414,7 @@ export default function App() {
       </nav>
 
       <footer className="foot">
-        🍳 菜谱规划 · 云端共享数据
+        菜谱规划 · 云端共享数据
         {saveState === 'saving' && <span className="sync"> · 保存中…</span>}
         {saveState === 'saved' && <span className="sync ok"> · 已同步</span>}
         {saveState === 'error' && (

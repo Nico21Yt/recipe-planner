@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CATEGORIES, DIFFICULTY, STATUS } from '../storage'
+import { CATEGORIES, STATUS } from '../storage'
 import { useUI } from '../ui-context'
 
 export default function RecipeForm({ initial, onCancel, onSave }) {
@@ -73,6 +73,9 @@ export default function RecipeForm({ initial, onCancel, onSave }) {
       ingredients: r.ingredients.filter((i) => i.name.trim()),
       steps: r.steps.map((s) => s.trim()).filter(Boolean),
     }
+    delete cleaned.time
+    delete cleaned.servings
+    delete cleaned.difficulty
     onSave(cleaned)
   }
 
@@ -111,37 +114,6 @@ export default function RecipeForm({ initial, onCancel, onSave }) {
                 </option>
               ))}
             </select>
-          </label>
-          <label className="field">
-            <span>难度</span>
-            <select
-              value={r.difficulty}
-              onChange={(e) => set('difficulty', Number(e.target.value))}
-            >
-              {Object.entries(DIFFICULTY).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>耗时(分钟)</span>
-            <input
-              type="number"
-              min="1"
-              value={r.time}
-              onChange={(e) => set('time', Number(e.target.value))}
-            />
-          </label>
-          <label className="field">
-            <span>份数</span>
-            <input
-              type="number"
-              min="1"
-              value={r.servings}
-              onChange={(e) => set('servings', Number(e.target.value))}
-            />
           </label>
           <label className="field">
             <span>状态</span>
