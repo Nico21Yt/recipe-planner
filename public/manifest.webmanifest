@@ -1,12 +1,12 @@
 {
-  "name": "菜谱规划",
-  "short_name": "菜谱规划",
-  "description": "给新手厨师的备菜清单：管理菜谱、规划明天吃什么、记录做饭日记。",
+  "name": "Nico的小厨房",
+  "short_name": "小厨房",
+  "description": "Nico 的小厨房：管理菜谱、规划吃什么、记录做饭日记。",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
-  "background_color": "#f3f8f1",
-  "theme_color": "#3da35d",
+  "background_color": "#dbe8cd",
+  "theme_color": "#3a6b43",
   "lang": "zh-CN",
   "icons": [
     {

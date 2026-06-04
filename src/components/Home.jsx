@@ -41,7 +41,7 @@ export default function Home({ recipes, plans, onPick }) {
   return (
     <main className="content home">
       <div className="home-hero">
-        <span className="home-kicker">灶感 · 新手厨房手记</span>
+        <span className="home-kicker">Nico · 小厨房</span>
         <h2>
           今天想做点<em>什么</em>？
         </h2>

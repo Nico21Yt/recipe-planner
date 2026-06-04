@@ -82,9 +82,10 @@
 }
 .brand h1 {
   margin: 0;
-  font-size: 23px;
+  font-size: clamp(17px, 3.8vw, 22px);
   font-weight: 600;
   letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 .brand p {
   margin: 2px 0 0;

@@ -1,6 +1,6 @@
 // 极简 Service Worker：缓存 app 静态外壳，让二次打开更快、弱网也能进入。
 // 数据接口（/api/*）始终走网络，保证多人共享数据是最新的。
-const CACHE = 'recipe-planner-v2'
+const CACHE = 'recipe-planner-v3'
 const SHELL = ['./manifest.webmanifest', './icon-192.png', './icon-512.png']
 
 self.addEventListener('install', (e) => {

@@ -208,10 +208,10 @@ export default function App() {
             setView('list')
           }}
         >
-          <span className="logo">灶</span>
+          <span className="logo">N</span>
           <div>
-            <h1>菜谱规划</h1>
-            <p>给新手厨师的备菜清单</p>
+            <h1>Nico的小厨房</h1>
+            <p>备菜 · 计划 · 记录</p>
           </div>
         </div>
 
@@ -411,7 +411,7 @@ export default function App() {
       </nav>
 
       <footer className="foot">
-        菜谱规划 · 云端共享数据
+        Nico的小厨房 · 云端共享数据
         {saveState === 'saving' && <span className="sync"> · 保存中…</span>}
         {saveState === 'saved' && <span className="sync ok"> · 已同步</span>}
         {saveState === 'error' && (
