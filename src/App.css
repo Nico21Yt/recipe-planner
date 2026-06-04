@@ -1912,16 +1912,34 @@
 
 /* ---------- Responsive ---------- */
 @media (max-width: 720px) {
-  .app {
-    height: 100dvh;
-    min-height: 100dvh;
-    max-height: 100dvh;
+  html,
+  body {
     overflow: hidden;
+    height: 100%;
+  }
+
+  #root {
+    height: 100%;
+  }
+
+  /* 对齐浏览器「可见区域」，避免与地址栏/工具栏叠成双下巴 */
+  .app {
+    position: fixed;
+    top: var(--app-offset-top, 0px);
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: var(--app-height, 100svh);
+    max-height: var(--app-height, 100svh);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1;
   }
 
   .topbar {
     flex-shrink: 0;
-    padding: calc(10px + var(--safe-top)) 14px 10px;
+    padding: calc(8px + var(--safe-top)) 14px 8px;
     gap: 8px;
   }
   .brand p {
@@ -1979,7 +1997,7 @@
     display: flex;
     align-items: stretch;
     gap: 6px;
-    padding: 8px 10px max(8px, var(--safe-bottom));
+    padding: 8px 10px;
   }
   .bn-item {
     flex: 1;
@@ -2034,5 +2052,14 @@
 
   .update-banner {
     flex-shrink: 0;
+  }
+}
+
+/* 添加到主屏幕：无浏览器地址栏，仍用 visualViewport（通常为全屏） */
+@media (max-width: 720px) and (display-mode: standalone) {
+  .app {
+    top: 0;
+    height: var(--app-height, 100dvh);
+    max-height: var(--app-height, 100dvh);
   }
 }
