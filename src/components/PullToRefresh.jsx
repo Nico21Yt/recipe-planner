@@ -137,7 +137,7 @@ export default function PullToRefresh({ className = '', onRefresh, children }) {
             {refreshing ? (
               <>
                 <span className="ptr-spinner" />
-                <span className="ptr-label">正在刷新…</span>
+                <span className="ptr-label">正在同步…</span>
               </>
             ) : ready ? (
               <>

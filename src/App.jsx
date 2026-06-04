@@ -10,6 +10,7 @@ import Home from './components/Home'
 import { generateRecipe, modifyRecipe } from './ai'
 import { fetchData, saveData, CLIENT_ID } from './cloud'
 import { useUI } from './ui-context'
+import { applyAppUpdateIfNeeded } from './appUpdate'
 import { APP_VERSION } from './version'
 import './App.css'
 
@@ -59,20 +60,26 @@ export default function App() {
       })
   }, [applyRemote])
 
-  const refreshFromCloud = useCallback(() => {
-    return fetchData()
-      .then((data) => {
-        applyRemote(data)
-        const now = Date.now()
-        if (now - lastRefreshToastAt.current >= REFRESH_TOAST_GAP_MS) {
-          lastRefreshToastAt.current = now
-          toast('已更新到最新', 'success', 2200)
-        }
-      })
-      .catch((e) => {
-        toast('刷新失败：' + e.message, 'error', 3500)
-        throw e
-      })
+  const refreshFromCloud = useCallback(async () => {
+    try {
+      const data = await fetchData()
+      applyRemote(data)
+
+      const reloading = await applyAppUpdateIfNeeded()
+      if (reloading) {
+        toast('发现新版本，正在更新…', 'info', 1600)
+        return
+      }
+
+      const now = Date.now()
+      if (now - lastRefreshToastAt.current >= REFRESH_TOAST_GAP_MS) {
+        lastRefreshToastAt.current = now
+        toast('已更新到最新', 'success', 2200)
+      }
+    } catch (e) {
+      toast('刷新失败：' + e.message, 'error', 3500)
+      throw e
+    }
   }, [applyRemote, toast])
 
   function retryLoad() {
