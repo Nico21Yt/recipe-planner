@@ -391,7 +391,6 @@ export default function App() {
         <Diary
           plans={plans}
           recipes={recipes}
-          onOpenPlanDish={openPlanDish}
           onOpenRecipe={openRecipeFromTab}
         />
       )}

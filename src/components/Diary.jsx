@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { dayOf, formatMD, relativeDay, todayStr, weekdayCN } from '../storage'
 import Lightbox from './Lightbox'
 
-export default function Diary({ plans, recipes, onOpenPlanDish, onOpenRecipe }) {
+export default function Diary({ plans, recipes, onOpenRecipe }) {
   const today = todayStr()
   const [lightbox, setLightbox] = useState(null) // { photos, index }
 
@@ -81,24 +81,13 @@ export default function Diary({ plans, recipes, onOpenPlanDish, onOpenRecipe }) 
 
               <div className="diary-body">
                 {entry.dishes.length > 0 && (
-                  <ul className="diary-dish-list">
+                  <div className="diary-dishes">
                     {entry.dishes.map((d) => (
-                      <li key={d.id}>
-                        <button
-                          type="button"
-                          className="diary-dish-name"
-                          onClick={() =>
-                            onOpenPlanDish({
-                              date: entry.date,
-                              dishId: d.id,
-                            })
-                          }
-                        >
-                          {d.name}
-                        </button>
-                      </li>
+                      <span key={d.id} className="diary-dish-tag">
+                        {d.name}
+                      </span>
                     ))}
-                  </ul>
+                  </div>
                 )}
 
                 {entry.photos.length > 0 ? (
