@@ -197,6 +197,7 @@
   border: 1.5px solid var(--ink);
   border-radius: 12px;
   background: var(--surface);
+  font-size: 16px;
 }
 .ai-bar .dish-input:focus {
   border-color: var(--terracotta);
@@ -223,6 +224,7 @@
   border: 1.5px solid var(--ink);
   border-radius: 12px;
   background: var(--surface);
+  font-size: 16px;
   outline: none;
   transition: box-shadow 0.15s ease;
 }
@@ -1300,6 +1302,7 @@
   border: 1.5px solid var(--line-strong);
   border-radius: 10px;
   background: var(--surface);
+  font-size: 16px;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -1436,7 +1439,7 @@
   min-height: 72px;
   padding: 12px 14px;
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.5;
   color: var(--ink);
   background: var(--bg);
@@ -1975,6 +1978,13 @@
     height: 100%;
     background-color: var(--paper);
     background-image: none;
+    touch-action: manipulation;
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: 16px;
   }
 
   body::after {
