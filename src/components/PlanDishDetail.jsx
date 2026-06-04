@@ -38,9 +38,6 @@ export default function PlanDishDetail({
           <span className="wd">{weekdayCN(date)}</span>
         </div>
         <h2>{dish.name}</h2>
-        <p className="section-sub plan-dish-kicker">
-          材料勾选会同步到云端，照片仍挂在菜谱上。
-        </p>
       </div>
 
       {recipe ? (
@@ -70,7 +67,6 @@ export default function PlanDishDetail({
                   </li>
                 ))}
               </ul>
-              <p className="hint">勾选会保存，换设备也能看到。</p>
             </section>
 
             <section className="panel">

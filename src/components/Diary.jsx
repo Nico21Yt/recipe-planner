@@ -163,11 +163,6 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
                 {!hasAnyPhoto && entry.dishRows.length === 0 && (
                   <p className="hint">这天还没有记录~</p>
                 )}
-                {!hasAnyPhoto && entry.dishRows.length > 0 && (
-                  <p className="hint diary-day-hint">
-                    可在「吃过什么」中补充照片。
-                  </p>
-                )}
               </div>
             </section>
           )
