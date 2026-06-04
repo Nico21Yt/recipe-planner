@@ -6,6 +6,147 @@ import PageHeader from './PageHeader'
 
 const QUICK_SUGGESTIONS = ['鸡蛋', '牛奶', '番茄', '青菜', '大米', '酱油']
 
+function IconScan({ busy }) {
+  if (busy) {
+    return (
+      <svg className="pantry-feature-svg pantry-feature-svg-spin" viewBox="0 0 24 24" aria-hidden>
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.25" />
+        <path
+          d="M21 12a9 9 0 0 0-9-9"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+      </svg>
+    )
+  }
+  return (
+    <svg className="pantry-feature-svg" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="13" r="4" stroke="currentColor" strokeWidth="1.75" />
+    </svg>
+  )
+}
+
+function IconCook({ busy }) {
+  if (busy) {
+    return (
+      <svg className="pantry-feature-svg pantry-feature-svg-spin" viewBox="0 0 24 24" aria-hidden>
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.25" />
+        <path
+          d="M21 12a9 9 0 0 0-9-9"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+      </svg>
+    )
+  }
+  return (
+    <svg className="pantry-feature-svg" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M4 11h16M6 11V8a2 2 0 0 1 2-2h1l1-2h4l1 2h1a2 2 0 0 1 2 2v3"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 15h8l-1 5H9l-1-5z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function PantryFeatureActions({
+  scanBusy,
+  suggestBusy,
+  scanDisabled,
+  suggestDisabled,
+  pantryCount,
+  onScan,
+  onSuggest,
+  photoRef,
+  onPhotoPick,
+}) {
+  return (
+    <section className="pantry-features" aria-label="智能助手">
+      <button
+        type="button"
+        className={
+          'pantry-feature pantry-feature-scan' + (scanBusy ? ' is-busy' : '')
+        }
+        disabled={scanDisabled}
+        onClick={onScan}
+      >
+        <span className="pantry-feature-icon pantry-feature-icon-scan" aria-hidden>
+          <IconScan busy={scanBusy} />
+        </span>
+        <span className="pantry-feature-body">
+          <span className="pantry-feature-title">
+            {scanBusy ? '正在识别…' : '拍照识别'}
+          </span>
+          <span className="pantry-feature-desc">
+            {scanBusy ? '看一下冰箱里的食材' : '拍张照片，自动认出食材名'}
+          </span>
+        </span>
+        <span className="pantry-feature-go" aria-hidden>
+          →
+        </span>
+      </button>
+
+      <button
+        type="button"
+        className={
+          'pantry-feature pantry-feature-cook' + (suggestBusy ? ' is-busy' : '')
+        }
+        disabled={suggestDisabled}
+        onClick={onSuggest}
+      >
+        <span className="pantry-feature-icon pantry-feature-icon-cook" aria-hidden>
+          <IconCook busy={suggestBusy} />
+        </span>
+        <span className="pantry-feature-body">
+          <span className="pantry-feature-title">
+            {suggestBusy ? '正在推荐…' : '能做什么菜'}
+          </span>
+          <span className="pantry-feature-desc">
+            {pantryCount === 0
+              ? '先记几种食材再推荐'
+              : suggestBusy
+                ? '根据你现有的食材组合'
+                : `用 ${pantryCount} 种食材帮你搭配`}
+          </span>
+        </span>
+        <span className="pantry-feature-go" aria-hidden>
+          →
+        </span>
+      </button>
+
+      <input
+        ref={photoRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="sr-only"
+        onChange={onPhotoPick}
+      />
+    </section>
+  )
+}
+
 function nameKey(s) {
   return s.trim().toLowerCase()
 }
@@ -182,33 +323,18 @@ export default function Pantry({
     }
   }
 
-  const actionRow = (
-    <div className="pantry-actions">
-      <button
-        type="button"
-        className="btn pantry-action-btn"
-        disabled={scanBusy || !!currentConfirm}
-        onClick={() => photoRef.current?.click()}
-      >
-        {scanBusy ? '识别中…' : '拍照识别'}
-      </button>
-      <button
-        type="button"
-        className="btn pantry-action-btn pantry-action-secondary"
-        disabled={pantry.length === 0 || suggestBusy || scanBusy}
-        onClick={loadDishSuggestions}
-      >
-        {suggestBusy ? '推荐中…' : '能做什么菜'}
-      </button>
-      <input
-        ref={photoRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="sr-only"
-        onChange={handlePhotoPick}
-      />
-    </div>
+  const featureActions = (
+    <PantryFeatureActions
+      scanBusy={scanBusy}
+      suggestBusy={suggestBusy}
+      scanDisabled={scanBusy || !!currentConfirm}
+      suggestDisabled={pantry.length === 0 || suggestBusy || scanBusy}
+      pantryCount={pantry.length}
+      onScan={() => photoRef.current?.click()}
+      onSuggest={loadDishSuggestions}
+      photoRef={photoRef}
+      onPhotoPick={handlePhotoPick}
+    />
   )
 
   return (
@@ -217,6 +343,8 @@ export default function Pantry({
         title="有什么"
         sub="记录家里常备食材，拍照识别或看看能做什么菜。"
       />
+
+      {featureActions}
 
       {currentConfirm && (
         <section className="plan-card single pantry-card pantry-confirm-card">
@@ -282,8 +410,6 @@ export default function Pantry({
             </p>
           </div>
 
-          {actionRow}
-
           <div className="pantry-quick">
             <span className="pantry-quick-label">一键添加</span>
             <div className="pantry-quick-chips">
@@ -309,8 +435,6 @@ export default function Pantry({
         </section>
       ) : (
         <section className="plan-card single pantry-card">
-          {actionRow}
-
           <ul className="pantry-list">
             {sorted.map((item) => (
               <li key={item.id} className="pantry-item">
