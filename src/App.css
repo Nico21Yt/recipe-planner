@@ -1364,24 +1364,39 @@
 }
 .plan-date-pickable {
   position: relative;
-  cursor: pointer;
-  border-radius: 8px;
 }
-.plan-date-pickable:focus-within {
-  outline: 2px solid rgba(58, 107, 67, 0.35);
+.plan-date-btn {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  padding: 2px 4px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.plan-date-btn:focus-visible {
+  outline: 2px solid rgba(58, 107, 67, 0.45);
   outline-offset: 2px;
 }
-.plan-date-input-overlay {
+.plan-date-btn:active {
+  opacity: 0.85;
+}
+.plan-date-input-native {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
   padding: 0;
-  border: none;
+  border: 0;
   opacity: 0;
-  cursor: pointer;
-  font-size: 16px;
+  pointer-events: none;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
 }
 .sr-only {
   position: absolute;
@@ -1484,6 +1499,7 @@
   gap: 8px;
 }
 .dish-menu-item-ate {
+  display: block;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
 }
@@ -1499,6 +1515,10 @@
 }
 .dish-menu-row-ate {
   grid-template-columns: 22px minmax(0, 1fr) auto;
+}
+.dish-menu-row-ate .dish-menu-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .dish-menu-actions {
   display: flex;

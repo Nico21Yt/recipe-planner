@@ -27,6 +27,18 @@ export default function MealPlan({
   const [listOpen, setListOpen] = useState(false)
   const comboRef = useRef(null)
   const inputRef = useRef(null)
+  const ateDateRef = useRef(null)
+
+  function openAteDatePicker() {
+    const el = ateDateRef.current
+    if (!el) return
+    try {
+      if (typeof el.showPicker === 'function') el.showPicker()
+      else el.click()
+    } catch {
+      el.click()
+    }
+  }
 
   const isAte = which === 'ate'
   const targetDate = isAte
@@ -232,24 +244,39 @@ export default function MealPlan({
 
       <section className="plan-card single">
         <div className="plan-card-head">
-          <div className={'plan-date' + (isAte ? ' plan-date-pickable' : '')}>
-            {isAte && (
+          {isAte ? (
+            <div className="plan-date plan-date-pickable">
+              <button
+                type="button"
+                className="plan-date-btn"
+                onClick={openAteDatePicker}
+                aria-label={'选择日期，当前 ' + formatMD(targetDate)}
+              >
+                <span className="rel">{dateRel}</span>
+                <span className="md">{formatMD(targetDate)}</span>
+                <span className="wd">{weekdayCN(targetDate)}</span>
+              </button>
               <input
+                ref={ateDateRef}
                 type="date"
-                className="plan-date-input-overlay"
+                className="plan-date-input-native"
                 value={ateDate}
                 max={today}
-                aria-label="选择日期"
+                tabIndex={-1}
+                aria-hidden
                 onChange={(e) => {
                   const v = e.target.value
                   if (v && v <= today) setAteDate(v)
                 }}
               />
-            )}
-            <span className="rel">{dateRel}</span>
-            <span className="md">{formatMD(targetDate)}</span>
-            <span className="wd">{weekdayCN(targetDate)}</span>
-          </div>
+            </div>
+          ) : (
+            <div className="plan-date">
+              <span className="rel">{dateRel}</span>
+              <span className="md">{formatMD(targetDate)}</span>
+              <span className="wd">{weekdayCN(targetDate)}</span>
+            </div>
+          )}
         </div>
 
         {dishes.length > 0 ? (
