@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { STATUS, dayOf, readPhoto } from '../storage'
+import { dayOf, readPhoto } from '../storage'
 import { uploadPhoto, deletePhotoBlob } from '../cloud'
 import { useUI } from '../ui-context'
 import Lightbox from './Lightbox'
@@ -21,7 +21,6 @@ export default function RecipeDetail({
   onBack,
   onEdit,
   onDelete,
-  onStatusChange,
   onPhotosChange,
   onToggleFavorite,
 }) {
@@ -110,34 +109,6 @@ export default function RecipeDetail({
             onClick={onToggleFavorite}
           />
         </div>
-        <div className="meta big">
-          <span className="cat">{recipe.category}</span>
-        </div>
-        <div className="status-row">
-          {Object.entries(STATUS).map(([key, st]) => (
-            <button
-              key={key}
-              className={'status-pill' + (recipe.status === key ? ' on' : '')}
-              style={
-                recipe.status === key
-                  ? { background: st.color, borderColor: st.color }
-                  : undefined
-              }
-              onClick={() => onStatusChange(key)}
-            >
-              {st.label}
-            </button>
-          ))}
-        </div>
-        {recipe.tags?.length > 0 && (
-          <div className="tags">
-            {recipe.tags.map((t) => (
-              <span key={t} className="tag">
-                {t}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="detail-grid">

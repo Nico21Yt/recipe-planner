@@ -380,7 +380,6 @@ export default function App() {
           onBack={() => setView('list')}
           onEdit={() => openEdit(active.id)}
           onDelete={() => handleDelete(active.id)}
-          onStatusChange={(s) => changeStatus(active.id, s)}
           onPhotosChange={(photos) => updateRecipe(active.id, { photos })}
           onToggleFavorite={() =>
             updateRecipe(active.id, { favorite: !active.favorite })
