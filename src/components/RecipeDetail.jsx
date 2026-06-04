@@ -52,7 +52,7 @@ export default function RecipeDetail({
         <section className="panel ai-modify-panel">
           <h3 className="ai-modify-title">AI 改菜谱</h3>
           <p className="hint ai-modify-hint">
-            说出想怎么改，例如「改成两人份」「去掉香菜」「步骤写简单一点」。
+            小改动可直接说，如「两人份」「少放盐」。若换成预制菜、换空气炸锅等，请写清楚，例如「我用的是冷冻预制小鱿鱼，400°F 空气炸锅 8 分钟，请按这个重写整份菜谱（材料、步骤、贴士）」。
           </p>
           <textarea
             className="ai-modify-input"
