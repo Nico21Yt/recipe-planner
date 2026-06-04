@@ -43,12 +43,12 @@ export default function RecipeDetail({
         <section className="panel ai-modify-panel">
           <h3 className="ai-modify-title">AI 改菜谱</h3>
           <p className="hint ai-modify-hint">
-            小改动可直接说，如「两人份」「少放盐」。若换成预制菜、换空气炸锅等，请写清楚，例如「我用的是冷冻预制小鱿鱼，400°F 空气炸锅 8 分钟，请按这个重写整份菜谱（材料、步骤、贴士）」。
+            例：两人份、少放盐。换食材或做法时，简要说明即可。
           </p>
           <textarea
             className="ai-modify-input"
             rows={2}
-            placeholder="输入修改要求…"
+            placeholder="写下修改要求…"
             value={aiPrompt}
             disabled={aiBusy}
             onChange={(e) => setAiPrompt(e.target.value)}
