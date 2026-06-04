@@ -12,11 +12,10 @@ export default function MealPlan({
   plans,
   recipes,
   onChange,
-  onOpenRecipe,
+  onOpenDish,
   onGenerateRecipe,
 }) {
   const today = todayStr()
-  // 默认记录“明天”；刚过凌晨想记当天就切到“今天”
   const [which, setWhich] = useState('tomorrow')
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
@@ -24,7 +23,6 @@ export default function MealPlan({
   const comboRef = useRef(null)
   const inputRef = useRef(null)
 
-  // 点击下拉框外面就收起
   useEffect(() => {
     function onDocClick(e) {
       if (comboRef.current && !comboRef.current.contains(e.target)) {
@@ -37,10 +35,19 @@ export default function MealPlan({
 
   const targetDate = which === 'today' ? today : addDays(today, 1)
   const plan = plans.find((p) => p.date === targetDate) || null
+  const chefNote = plan?.chefNote ?? ''
 
   function ensurePlan(list) {
     if (list.some((p) => p.date === targetDate)) return list
     return [...list, emptyPlan(targetDate)]
+  }
+
+  function updatePlan(patch) {
+    onChange(
+      ensurePlan(plans).map((p) =>
+        p.date === targetDate ? { ...p, ...patch } : p,
+      ),
+    )
   }
 
   function appendDish(currentPlans, dish) {
@@ -52,17 +59,43 @@ export default function MealPlan({
     )
   }
 
+  const dishes = plan?.dishes || []
+  const selectedRecipeIds = new Set(
+    dishes.map((d) => d.recipeId).filter(Boolean),
+  )
+  const selectedNames = new Set(
+    dishes.map((d) => d.name.trim().toLowerCase()),
+  )
+
+  function isAlreadySelected(nameOrRecipe) {
+    const recipe =
+      typeof nameOrRecipe === 'string'
+        ? recipes.find((r) => r.name.trim() === nameOrRecipe.trim())
+        : nameOrRecipe
+    const nameKey = (
+      typeof nameOrRecipe === 'string' ? nameOrRecipe : nameOrRecipe.name
+    )
+      .trim()
+      .toLowerCase()
+    if (selectedNames.has(nameKey)) return true
+    if (recipe?.id && selectedRecipeIds.has(recipe.id)) return true
+    return false
+  }
+
   const match = recipes.find((r) => r.name === input.trim())
   const isNewDish = input.trim() && !match
+  const alreadySelected = input.trim() && isAlreadySelected(input.trim())
 
   const query = input.trim().toLowerCase()
   const options = recipes.filter(
-    (r) => !query || r.name.toLowerCase().includes(query),
+    (r) =>
+      !isAlreadySelected(r) &&
+      (!query || r.name.toLowerCase().includes(query)),
   )
 
   async function addDish(nameArg) {
     const name = (nameArg ?? input).trim()
-    if (!name || busy) return
+    if (!name || busy || isAlreadySelected(name)) return
 
     const m = recipes.find((r) => r.name === name)
     if (m) {
@@ -72,7 +105,6 @@ export default function MealPlan({
       return
     }
 
-    // 新菜：用 AI 生成菜谱、加入菜谱库，再把这道菜排进计划
     setBusy(true)
     setOpen(false)
     try {
@@ -94,16 +126,12 @@ export default function MealPlan({
     )
   }
 
-  const dishes = plan?.dishes || []
-
   return (
     <main className="content">
       <div className="section-head">
         <div>
           <h2>{which === 'today' ? '今天吃什么' : '明天吃什么'}</h2>
-          <p className="section-sub">
-            自动按当前日期记录，挑好菜到点就照着做。
-          </p>
+          <p className="section-sub">挑好菜，备注留给做菜的人。</p>
         </div>
       </div>
 
@@ -132,35 +160,42 @@ export default function MealPlan({
         </div>
 
         {dishes.length > 0 ? (
-          <ul className="dish-list">
-            {dishes.map((d) => (
-              <li key={d.id} className="dish">
-                <span
-                  className={'dish-name' + (d.recipeId ? ' linked' : '')}
-                  onClick={() => d.recipeId && onOpenRecipe(d.recipeId)}
-                  title={d.recipeId ? '查看菜谱' : '自定义菜（菜谱里还没有）'}
-                >
-                  {d.recipeId ? (
-                    <span className="dish-kind">菜谱</span>
-                  ) : (
-                    <span className="dish-kind custom">自定</span>
-                  )}
-                  {d.name}
+          <ol className="dish-menu">
+            {dishes.map((d, i) => (
+              <li key={d.id} className="dish-menu-item">
+                <span className="dish-menu-no" aria-hidden>
+                  {i + 1}
                 </span>
                 <button
                   type="button"
-                  className="btn icon"
-                  aria-label="移除"
-                  onClick={() => removeDish(d.id)}
+                  className="dish-menu-name linked"
+                  onClick={() => onOpenDish({ date: targetDate, dishId: d.id })}
                 >
-                  移除
+                  {d.name}
                 </button>
+                <button
+                  type="button"
+                  className="dish-menu-dismiss"
+                  aria-label={'去掉「' + d.name + '」'}
+                  onClick={() => removeDish(d.id)}
+                />
               </li>
             ))}
-          </ul>
+          </ol>
         ) : (
-          <p className="hint">还没安排，加几道想做的菜吧~</p>
+          <p className="hint plan-empty-hint">还没安排，加几道想做的菜吧。</p>
         )}
+
+        <label className="chef-note">
+          <span className="chef-note-label">给厨师的备注</span>
+          <textarea
+            className="chef-note-input"
+            rows={3}
+            placeholder="口味偏好、忌口、少油少盐、多准备一份…"
+            value={chefNote}
+            onChange={(e) => updatePlan({ chefNote: e.target.value })}
+          />
+        </label>
 
         <div className="dish-add">
           <div className="combo" ref={comboRef}>
@@ -229,12 +264,15 @@ export default function MealPlan({
           <button
             className={'btn small ' + (isNewDish ? 'accent' : 'primary')}
             onClick={() => addDish()}
-            disabled={busy || !input.trim()}
+            disabled={busy || !input.trim() || alreadySelected}
           >
             {busy ? 'AI 生成中…' : isNewDish ? '生成并添加' : '添加'}
           </button>
         </div>
-        {isNewDish && !busy && (
+        {alreadySelected && !busy && (
+          <p className="hint">这道菜已经在计划里了。</p>
+        )}
+        {isNewDish && !busy && !alreadySelected && (
           <p className="hint">
             「{input.trim()}」还不在菜谱里，点上面按钮会用 AI 生成菜谱并自动加入。
           </p>

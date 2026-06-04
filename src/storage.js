@@ -80,7 +80,46 @@ export function emptyPlan(date) {
     id: 'pl_' + Math.random().toString(36).slice(2, 9),
     date,
     dishes: [],
+    chefNote: '',
   }
+}
+
+export const PREP_STATUS = {
+  todo: { label: '待备菜', color: '#cf9a2c' },
+  shopping: { label: '已买齐', color: '#5a7a9a' },
+  prepping: { label: '备菜中', color: '#c5562a' },
+  ready: { label: '已备好', color: '#3c6e47' },
+}
+
+export function normalizePrep(prep) {
+  const status =
+    prep?.status && PREP_STATUS[prep.status] ? prep.status : 'todo'
+  const checked = Array.isArray(prep?.checked)
+    ? [...new Set(prep.checked.filter((n) => Number.isInteger(n) && n >= 0))]
+    : []
+  return { status, checked, note: (prep?.note || '').toString() }
+}
+
+export function normalizeDish(dish) {
+  if (!dish) return dish
+  return {
+    ...dish,
+    name: (dish.name || '').trim(),
+    prep: normalizePrep(dish.prep),
+  }
+}
+
+export function normalizePlan(plan) {
+  if (!plan) return plan
+  return {
+    ...plan,
+    chefNote: plan.chefNote ?? '',
+    dishes: (plan.dishes || []).map(normalizeDish),
+  }
+}
+
+export function normalizePlans(plans) {
+  return (plans || []).map(normalizePlan)
 }
 
 export function makeDish(name, recipeId = null) {
@@ -88,6 +127,7 @@ export function makeDish(name, recipeId = null) {
     id: 'd_' + Math.random().toString(36).slice(2, 9),
     name: name.trim(),
     recipeId,
+    prep: normalizePrep(null),
   }
 }
 

@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { CATEGORIES, STATUS, cleanRecipe, emptyRecipe } from './storage'
+import {
+  CATEGORIES,
+  STATUS,
+  cleanRecipe,
+  emptyRecipe,
+  normalizePlans,
+} from './storage'
 import RecipeCard from './components/RecipeCard'
 import RecipeDetail from './components/RecipeDetail'
 import RecipeForm from './components/RecipeForm'
 import MealPlan from './components/MealPlan'
+import PlanDishDetail from './components/PlanDishDetail'
 import Diary from './components/Diary'
 import Home from './components/Home'
 import { generateRecipe } from './ai'
@@ -24,6 +31,7 @@ export default function App() {
   const [plans, setPlans] = useState([])
   const [view, setView] = useState('list') // list | detail | form
   const [activeId, setActiveId] = useState(null)
+  const [planDish, setPlanDish] = useState(null) // { date, dishId }
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterCategory, setFilterCategory] = useState('all')
@@ -41,7 +49,7 @@ export default function App() {
     return fetchData()
       .then(({ recipes, plans, updatedAt }) => {
         setRecipes(recipes.map(cleanRecipe))
-        setPlans(plans)
+        setPlans(normalizePlans(plans))
         setLoadError(null)
         knownUpdatedAt.current = updatedAt
         setHasUpdate(false)
@@ -134,8 +142,40 @@ export default function App() {
   }
 
   function openRecipeFromTab(id) {
+    setPlanDish(null)
     setTab('recipes')
     openDetail(id)
+  }
+
+  function openPlanDish({ date, dishId }) {
+    setTab('plan')
+    setPlanDish({ date, dishId })
+  }
+
+  const planDishCtx = useMemo(() => {
+    if (!planDish) return null
+    const plan = plans.find((p) => p.date === planDish.date)
+    const dish = plan?.dishes?.find((d) => d.id === planDish.dishId)
+    if (!dish) return null
+    const recipe = dish.recipeId
+      ? recipes.find((r) => r.id === dish.recipeId) || null
+      : null
+    return { date: planDish.date, dish, recipe }
+  }, [planDish, plans, recipes])
+
+  function updateDishPrep(date, dishId, prep) {
+    setPlans((prev) =>
+      prev.map((p) =>
+        p.date === date
+          ? {
+              ...p,
+              dishes: p.dishes.map((d) =>
+                d.id === dishId ? { ...d, prep } : d,
+              ),
+            }
+          : p,
+      ),
+    )
   }
 
   async function handleGenerate(name) {
@@ -198,6 +238,19 @@ export default function App() {
     )
   }
 
+  function updateRecipePhotos(id, photosOrFn) {
+    setRecipes((prev) =>
+      prev.map((r) => {
+        if (r.id !== id) return r
+        const photos =
+          typeof photosOrFn === 'function'
+            ? photosOrFn(r.photos || [])
+            : photosOrFn
+        return { ...r, photos }
+      }),
+    )
+  }
+
   return (
     <div className="app">
       <header className="topbar">
@@ -206,6 +259,7 @@ export default function App() {
           onClick={() => {
             setTab('home')
             setView('list')
+            setPlanDish(null)
           }}
         >
           <span className="logo">灶</span>
@@ -224,6 +278,7 @@ export default function App() {
                 onClick={() => {
                   setTab(t.id)
                   if (t.id === 'recipes') setView('list')
+                  setPlanDish(null)
                 }}
               >
                 {t.label}
@@ -267,18 +322,40 @@ export default function App() {
         />
       )}
 
-      {!loading && !loadError && tab === 'plan' && (
+      {!loading && !loadError && tab === 'plan' && planDishCtx && (
+        <PlanDishDetail
+          date={planDishCtx.date}
+          dish={planDishCtx.dish}
+          recipe={planDishCtx.recipe}
+          onBack={() => setPlanDish(null)}
+          onPrepChange={(prep) =>
+            updateDishPrep(planDishCtx.date, planDishCtx.dish.id, prep)
+          }
+          onPhotosChange={(photos) => {
+            if (planDishCtx.recipe) {
+              updateRecipePhotos(planDishCtx.recipe.id, photos)
+            }
+          }}
+        />
+      )}
+
+      {!loading && !loadError && tab === 'plan' && !planDishCtx && (
         <MealPlan
           plans={plans}
           recipes={recipes}
           onChange={setPlans}
-          onOpenRecipe={openRecipeFromTab}
+          onOpenDish={openPlanDish}
           onGenerateRecipe={handleGenerate}
         />
       )}
 
       {!loading && !loadError && tab === 'diary' && (
-        <Diary plans={plans} recipes={recipes} onOpenRecipe={openRecipeFromTab} />
+        <Diary
+          plans={plans}
+          recipes={recipes}
+          onOpenPlanDish={openPlanDish}
+          onOpenRecipe={openRecipeFromTab}
+        />
       )}
 
       {!loading && !loadError && tab === 'recipes' && view === 'list' && (
@@ -378,9 +455,7 @@ export default function App() {
         <RecipeDetail
           recipe={active}
           onBack={() => setView('list')}
-          onEdit={() => openEdit(active.id)}
-          onDelete={() => handleDelete(active.id)}
-          onPhotosChange={(photos) => updateRecipe(active.id, { photos })}
+          onPhotosChange={(photos) => updateRecipePhotos(active.id, photos)}
         />
       )}
 
@@ -392,19 +467,22 @@ export default function App() {
         />
       )}
 
-      <nav className="bottom-nav">
-        {[{ id: 'home', short: '首页' }, ...TABS].map((t) => (
-          <button
-            key={t.id}
-            className={'bn-item' + (tab === t.id ? ' active' : '')}
-            onClick={() => {
-              setTab(t.id)
-              if (t.id === 'recipes') setView('list')
-            }}
-          >
-            <span className="bn-label">{t.short}</span>
-          </button>
-        ))}
+      <nav className="bottom-nav" aria-label="主导航">
+        <div className="bottom-nav-inner">
+          {[{ id: 'home', short: '首页' }, ...TABS].map((t) => (
+            <button
+              key={t.id}
+              className={'bn-item' + (tab === t.id ? ' active' : '')}
+              onClick={() => {
+                setTab(t.id)
+                if (t.id === 'recipes') setView('list')
+                setPlanDish(null)
+              }}
+            >
+              <span className="bn-label">{t.short}</span>
+            </button>
+          ))}
+        </div>
       </nav>
 
       <footer className="foot">

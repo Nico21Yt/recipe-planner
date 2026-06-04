@@ -49,6 +49,10 @@
   box-sizing: border-box;
 }
 
+html {
+  height: -webkit-fill-available;
+}
+
 html,
 body {
   margin: 0;
@@ -72,6 +76,9 @@ body {
       transparent 60%
     );
   background-attachment: fixed;
+  min-height: 100vh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;

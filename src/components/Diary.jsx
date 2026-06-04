@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { dayOf, formatMD, relativeDay, todayStr, weekdayCN } from '../storage'
 import Lightbox from './Lightbox'
 
-export default function Diary({ plans, recipes, onOpenRecipe }) {
+export default function Diary({ plans, recipes, onOpenPlanDish, onOpenRecipe }) {
   const today = todayStr()
   const [lightbox, setLightbox] = useState(null) // { photos, index }
 
@@ -85,8 +85,10 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
                     {entry.dishes.map((d) => (
                       <span
                         key={d.id}
-                        className={'dish-chip' + (d.recipeId ? ' linked' : '')}
-                        onClick={() => d.recipeId && onOpenRecipe(d.recipeId)}
+                        className="dish-chip linked"
+                        onClick={() =>
+                          onOpenPlanDish({ date: entry.date, dishId: d.id })
+                        }
                       >
                         {d.name}
                       </span>
@@ -134,8 +136,8 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
               <button
                 className="btn ghost small"
                 onClick={() => {
-                  onOpenRecipe(photo.recipeId)
                   setLightbox(null)
+                  onOpenRecipe(photo.recipeId)
                 }}
               >
                 查看菜谱
