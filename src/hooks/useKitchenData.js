@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { cleanRecipe, normalizePlans } from '../storage'
+import { cleanRecipe, normalizePantry, normalizePlans } from '../storage'
 import { fetchData, saveData, CLIENT_ID } from '../cloud'
 
 export function useKitchenData() {
   const [recipes, setRecipes] = useState([])
   const [plans, setPlans] = useState([])
+  const [pantry, setPantry] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(null)
   const [saveState, setSaveState] = useState('idle')
@@ -19,9 +20,10 @@ export function useKitchenData() {
     saveIdleTimer.current = setTimeout(() => setSaveState('idle'), ms)
   }
 
-  const applyRemote = useCallback(({ recipes, plans, updatedAt }) => {
+  const applyRemote = useCallback(({ recipes, plans, pantry, updatedAt }) => {
     setRecipes(recipes.map(cleanRecipe))
     setPlans(normalizePlans(plans))
+    setPantry(normalizePantry(pantry))
     setLoadError(null)
     knownUpdatedAt.current = updatedAt
     setHasUpdate(false)
@@ -53,7 +55,7 @@ export function useKitchenData() {
     if (saveIdleTimer.current) clearTimeout(saveIdleTimer.current)
     setSaveState('saving')
     saveTimer.current = setTimeout(() => {
-      saveData({ recipes, plans })
+      saveData({ recipes, plans, pantry })
         .then((updatedAt) => {
           setSaveState('saved')
           knownUpdatedAt.current = updatedAt
@@ -68,7 +70,7 @@ export function useKitchenData() {
       if (saveTimer.current) clearTimeout(saveTimer.current)
       if (saveIdleTimer.current) clearTimeout(saveIdleTimer.current)
     }
-  }, [recipes, plans])
+  }, [recipes, plans, pantry])
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -92,6 +94,8 @@ export function useKitchenData() {
     setRecipes,
     plans,
     setPlans,
+    pantry,
+    setPantry,
     loading,
     loadError,
     saveState,

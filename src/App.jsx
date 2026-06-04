@@ -15,12 +15,14 @@ import './App.css'
 
 const MealPlan = lazy(() => import('./components/MealPlan'))
 const PlanDishDetail = lazy(() => import('./components/PlanDishDetail'))
+const Pantry = lazy(() => import('./components/Pantry'))
 const Diary = lazy(() => import('./components/Diary'))
 const RecipeForm = lazy(() => import('./components/RecipeForm'))
 
 const TABS = [
   { id: 'recipes', label: '菜谱', short: '菜谱' },
   { id: 'plan', label: '吃什么', short: '吃什么' },
+  { id: 'pantry', label: '有什么', short: '有什么' },
   { id: 'diary', label: '做饭日记', short: '日记' },
 ]
 
@@ -41,6 +43,8 @@ export default function App() {
     setRecipes,
     plans,
     setPlans,
+    pantry,
+    setPantry,
     loading,
     loadError,
     saveState,
@@ -332,6 +336,7 @@ export default function App() {
         <Home
           recipes={recipes}
           plans={plans}
+          pantry={pantry}
           onRefresh={refreshFromCloud}
           onPick={(id) => {
             setTab(id)
@@ -371,6 +376,12 @@ export default function App() {
               updateRecipePhotos(id, photosOrFn)
             }
           />
+        </Suspense>
+      )}
+
+      {!loading && !loadError && tab === 'pantry' && (
+        <Suspense fallback={<TabFallback />}>
+          <Pantry pantry={pantry} onChange={setPantry} />
         </Suspense>
       )}
 

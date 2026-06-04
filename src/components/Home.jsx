@@ -1,10 +1,11 @@
 import { dayOf, todayStr } from '../storage'
 import PullToRefresh from './PullToRefresh'
 
-export default function Home({ recipes, plans, onPick, onRefresh }) {
+export default function Home({ recipes, plans, pantry, onPick, onRefresh }) {
   const today = todayStr()
 
   const recipeCount = recipes.length
+  const pantryCount = pantry?.length ?? 0
   const upcomingCount = plans.filter((p) => p.date >= today).length
 
   const diaryDays = new Set()
@@ -30,6 +31,13 @@ export default function Home({ recipes, plans, onPick, onRefresh }) {
       title: '吃什么',
       desc: '安排今天/明天，或用「吃过什么」补记外卖外食',
       stat: upcomingCount > 0 ? `${upcomingCount} 天已安排` : '还没安排',
+    },
+    {
+      id: 'pantry',
+      title: '有什么',
+      desc: '记下家里常备食材，买菜前看一眼',
+      stat:
+        pantryCount > 0 ? `${pantryCount} 种食材` : '还没记录',
     },
     {
       id: 'diary',

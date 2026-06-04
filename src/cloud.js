@@ -27,17 +27,24 @@ export async function fetchData() {
   return {
     recipes: Array.isArray(data.recipes) ? data.recipes : [],
     plans: Array.isArray(data.plans) ? data.plans : [],
+    pantry: Array.isArray(data.pantry) ? data.pantry : [],
     updatedAt: data.updatedAt || 0,
     clientId: data.clientId || '',
   }
 }
 
-export async function saveData({ recipes, plans }) {
+export async function saveData({ recipes, plans, pantry }) {
   const updatedAt = Date.now()
   const resp = await fetch(DATA_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ recipes, plans, updatedAt, clientId: CLIENT_ID }),
+    body: JSON.stringify({
+      recipes,
+      plans,
+      pantry: pantry ?? [],
+      updatedAt,
+      clientId: CLIENT_ID,
+    }),
   })
   if (!resp.ok) {
     let msg = `保存失败（${resp.status}）`

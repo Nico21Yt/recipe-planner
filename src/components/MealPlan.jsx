@@ -21,15 +21,16 @@ export default function MealPlan({
 }) {
   const today = todayStr()
   const [which, setWhich] = useState('tomorrow')
-  const [ateDate, setAteDate] = useState(today)
+  const [ateDate, setAteDate] = useState('')
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
   const [listOpen, setListOpen] = useState(false)
   const comboRef = useRef(null)
   const inputRef = useRef(null)
   const isAte = which === 'ate'
+  const ateReady = isAte && !!ateDate
   const targetDate = isAte
-    ? ateDate
+    ? ateDate || null
     : which === 'today'
       ? today
       : addDays(today, 1)
@@ -59,10 +60,12 @@ export default function MealPlan({
     return () => document.removeEventListener('mousedown', onDocClick)
   }, [])
 
-  const plan = plans.find((p) => p.date === targetDate) || null
+  const plan =
+    targetDate ? plans.find((p) => p.date === targetDate) || null : null
   const chefNote = plan?.chefNote ?? ''
 
   function ensurePlan(list) {
+    if (!targetDate) return list
     if (list.some((p) => p.date === targetDate)) return list
     return [...list, emptyPlan(targetDate, { diary: isAte })]
   }
@@ -127,6 +130,7 @@ export default function MealPlan({
   async function addDish(nameArg) {
     const name = (nameArg ?? input).trim()
     if (!name || busy || isAlreadySelected(name)) return
+    if (isAte && !ateReady) return
 
     const m = recipes.find((r) => r.name === name)
     if (m) {
@@ -192,13 +196,17 @@ export default function MealPlan({
     : '挑好菜，备注留给做菜的人。'
 
   const dateRel = isAte
-    ? relativeDay(targetDate) || '补记'
+    ? ateDate
+      ? relativeDay(ateDate) || '补记'
+      : '选日期'
     : which === 'today'
       ? '今天'
       : '明天'
 
   const emptyHint = isAte
-    ? '还没记录，加几道吃过的菜吧。'
+    ? ateReady
+      ? '还没记录，加几道吃过的菜吧。'
+      : '先选一天，再记录吃过的菜。'
     : '还没安排，加几道想做的菜吧。'
 
   return (
@@ -232,16 +240,31 @@ export default function MealPlan({
       <section className="plan-card single">
         <div className="plan-card-head">
           {isAte ? (
-            <label className="plan-date plan-date-pickable">
+            <label
+              className={
+                'plan-date plan-date-pickable' +
+                (ateDate ? '' : ' plan-date-unset')
+              }
+            >
               <span className="rel">{dateRel}</span>
-              <span className="md">{formatMD(targetDate)}</span>
-              <span className="wd">{weekdayCN(targetDate)}</span>
+              {ateDate ? (
+                <>
+                  <span className="md">{formatMD(ateDate)}</span>
+                  <span className="wd">{weekdayCN(ateDate)}</span>
+                </>
+              ) : (
+                <span className="md plan-date-placeholder">点击选择日期</span>
+              )}
               <input
                 type="date"
                 className="plan-date-input-native"
                 value={ateDate}
                 max={today}
-                aria-label={'选择日期，当前 ' + formatMD(targetDate)}
+                aria-label={
+                  ateDate
+                    ? '选择日期，当前 ' + formatMD(ateDate)
+                    : '选择吃过菜的日期'
+                }
                 onChange={(e) => {
                   const v = e.target.value
                   if (v && v <= today) setAteDate(v)
@@ -257,7 +280,7 @@ export default function MealPlan({
           )}
         </div>
 
-        {dishes.length > 0 ? (
+        {ateReady && dishes.length > 0 ? (
           <ol className="dish-menu">
             {dishes.map((d, i) => {
               const linkedRecipe = d.recipeId
@@ -322,6 +345,8 @@ export default function MealPlan({
           <p className="hint plan-empty-hint">{emptyHint}</p>
         )}
 
+        {ateReady && (
+          <>
         <div className="dish-add">
           <div className="combo" ref={comboRef}>
             <input
@@ -397,6 +422,8 @@ export default function MealPlan({
         )}
         {hasInput && isNewDish && !isAte && !busy && !alreadySelected && (
           <p className="hint">新菜名将用 AI 生成菜谱并加入。</p>
+        )}
+          </>
         )}
 
         {!isAte && (

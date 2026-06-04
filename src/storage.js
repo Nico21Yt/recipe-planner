@@ -121,6 +121,31 @@ export function makeDish(name, recipeId = null) {
   }
 }
 
+/* ============== 家里食材（有什么） ============== */
+
+export function emptyPantryItem(name = '') {
+  return {
+    id: 'pk_' + Math.random().toString(36).slice(2, 9),
+    name: name.trim(),
+    amount: '',
+    note: '',
+  }
+}
+
+export function normalizePantryItem(item) {
+  if (!item) return item
+  return {
+    id: item.id || 'pk_' + Math.random().toString(36).slice(2, 9),
+    name: (item.name || '').trim(),
+    amount: (item.amount || '').trim(),
+    note: (item.note || '').trim(),
+  }
+}
+
+export function normalizePantry(pantry) {
+  return (pantry || []).map(normalizePantryItem).filter((i) => i.name)
+}
+
 /* ---------- 日期工具 ---------- */
 
 // 本地时区的 YYYY-MM-DD
