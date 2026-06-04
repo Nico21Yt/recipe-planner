@@ -38,6 +38,12 @@ function TabFallback() {
 
 export default function App() {
   const { toast, confirm } = useUI()
+
+  const handleRemoteSync = useCallback(async () => {
+    const reloading = await applyAppUpdateIfNeeded()
+    if (reloading) toast('发现新版本，正在更新…', 'info', 1600)
+  }, [toast])
+
   const {
     recipes,
     setRecipes,
@@ -48,11 +54,10 @@ export default function App() {
     loading,
     loadError,
     saveState,
-    hasUpdate,
     doFetch,
     applyRemote,
     retryLoad,
-  } = useKitchenData()
+  } = useKitchenData({ onRemoteSync: handleRemoteSync })
 
   const [tab, setTab] = useState('home')
   const [view, setView] = useState('list')
@@ -304,17 +309,6 @@ export default function App() {
       </header>
 
       <WeChatBanner />
-
-      {hasUpdate && !loading && !loadError && (
-        <button
-          type="button"
-          className="update-banner"
-          disabled={syncing}
-          onClick={() => refreshFromCloud().catch(() => {})}
-        >
-          云端有更新，点击同步数据与版本
-        </button>
-      )}
 
       {loading && (
         <main className="content state-screen">

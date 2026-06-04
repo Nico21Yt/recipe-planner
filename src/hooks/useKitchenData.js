@@ -2,18 +2,21 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { cleanRecipe, normalizePantry, normalizePlans } from '../storage'
 import { fetchData, saveData, CLIENT_ID } from '../cloud'
 
-export function useKitchenData() {
+export function useKitchenData({ onRemoteSync } = {}) {
   const [recipes, setRecipes] = useState([])
   const [plans, setPlans] = useState([])
   const [pantry, setPantry] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(null)
   const [saveState, setSaveState] = useState('idle')
-  const [hasUpdate, setHasUpdate] = useState(false)
   const loadedRef = useRef(false)
   const saveTimer = useRef(null)
   const saveIdleTimer = useRef(null)
   const knownUpdatedAt = useRef(0)
+  const saveStateRef = useRef(saveState)
+  const onRemoteSyncRef = useRef(onRemoteSync)
+  saveStateRef.current = saveState
+  onRemoteSyncRef.current = onRemoteSync
 
   function scheduleSaveIdle(ms = 1800) {
     if (saveIdleTimer.current) clearTimeout(saveIdleTimer.current)
@@ -26,8 +29,23 @@ export function useKitchenData() {
     setPantry(normalizePantry(pantry))
     setLoadError(null)
     knownUpdatedAt.current = updatedAt
-    setHasUpdate(false)
   }, [])
+
+  const pullRemoteIfNewer = useCallback(() => {
+    if (!loadedRef.current) return Promise.resolve()
+    if (saveStateRef.current === 'saving') return Promise.resolve()
+    return fetchData()
+      .then((remote) => {
+        if (
+          remote.updatedAt > knownUpdatedAt.current &&
+          remote.clientId !== CLIENT_ID
+        ) {
+          applyRemote(remote)
+          onRemoteSyncRef.current?.()
+        }
+      })
+      .catch(() => {})
+  }, [applyRemote])
 
   const doFetch = useCallback(() => {
     return fetchData()
@@ -60,6 +78,7 @@ export function useKitchenData() {
           setSaveState('saved')
           knownUpdatedAt.current = updatedAt
           scheduleSaveIdle(1800)
+          return pullRemoteIfNewer()
         })
         .catch(() => {
           setSaveState('error')
@@ -70,24 +89,20 @@ export function useKitchenData() {
       if (saveTimer.current) clearTimeout(saveTimer.current)
       if (saveIdleTimer.current) clearTimeout(saveIdleTimer.current)
     }
-  }, [recipes, plans, pantry])
+  }, [recipes, plans, pantry, pullRemoteIfNewer])
 
   useEffect(() => {
-    const id = setInterval(() => {
-      if (!loadedRef.current) return
-      fetchData()
-        .then((remote) => {
-          if (
-            remote.updatedAt > knownUpdatedAt.current &&
-            remote.clientId !== CLIENT_ID
-          ) {
-            setHasUpdate(true)
-          }
-        })
-        .catch(() => {})
-    }, 25000)
+    const id = setInterval(() => pullRemoteIfNewer(), 25000)
     return () => clearInterval(id)
-  }, [])
+  }, [pullRemoteIfNewer])
+
+  useEffect(() => {
+    function onVisible() {
+      if (document.visibilityState === 'visible') pullRemoteIfNewer()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [pullRemoteIfNewer])
 
   return {
     recipes,
@@ -99,10 +114,9 @@ export function useKitchenData() {
     loading,
     loadError,
     saveState,
-    hasUpdate,
-    setHasUpdate,
     doFetch,
     applyRemote,
     retryLoad,
+    pullRemoteIfNewer,
   }
 }
