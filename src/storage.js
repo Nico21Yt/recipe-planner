@@ -6,15 +6,23 @@ export function cleanTags(tags) {
   return (tags || []).filter((t) => t && !EXCLUDED_TAGS.has(String(t).trim()))
 }
 
-export function cleanRecipe(recipe) {
-  if (!recipe) return recipe
-  return { ...recipe, tags: cleanTags(recipe.tags) }
-}
-
 export const STATUS = {
   todo: { label: '想试', color: '#cf9a2c' },
-  doing: { label: '正在做', color: '#c5562a' },
   done: { label: '做过', color: '#3c6e47' },
+}
+
+export function normalizeStatus(status) {
+  if (status === 'doing') return 'todo'
+  return STATUS[status] ? status : 'todo'
+}
+
+export function cleanRecipe(recipe) {
+  if (!recipe) return recipe
+  return {
+    ...recipe,
+    tags: cleanTags(recipe.tags),
+    status: normalizeStatus(recipe.status),
+  }
 }
 
 function uid() {

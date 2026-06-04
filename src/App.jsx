@@ -126,13 +126,18 @@ export default function App() {
           .toLowerCase()
         return hay.includes(q)
       })
-      .sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0))
+      .sort((a, b) => {
+        const aTodo = a.status === 'todo' ? 1 : 0
+        const bTodo = b.status === 'todo' ? 1 : 0
+        if (bTodo !== aTodo) return bTodo - aTodo
+        return (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0)
+      })
   }, [recipes, search, filterStatus, filterCategory])
 
   const counts = useMemo(() => {
-    const c = { all: recipes.length, todo: 0, doing: 0, done: 0 }
+    const c = { all: recipes.length, todo: 0, done: 0 }
     recipes.forEach((r) => {
-      c[r.status] = (c[r.status] || 0) + 1
+      if (r.status === 'todo' || r.status === 'done') c[r.status]++
     })
     return c
   }, [recipes])
