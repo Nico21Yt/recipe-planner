@@ -22,7 +22,6 @@ export default function RecipeDetail({
   onEdit,
   onDelete,
   onPhotosChange,
-  onToggleFavorite,
 }) {
   const { toast, confirm } = useUI()
   const [checked, setChecked] = useState(() => new Set())
@@ -99,16 +98,7 @@ export default function RecipeDetail({
       </div>
 
       <div className="detail-head">
-        <div className="detail-title">
-          <h2>{recipe.name}</h2>
-          <button
-            type="button"
-            className={'star big' + (recipe.favorite ? ' on' : '')}
-            title={recipe.favorite ? '取消收藏' : '收藏'}
-            aria-label={recipe.favorite ? '取消收藏' : '收藏'}
-            onClick={onToggleFavorite}
-          />
-        </div>
+        <h2>{recipe.name}</h2>
       </div>
 
       <div className="detail-grid">

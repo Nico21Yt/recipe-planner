@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { CATEGORIES, STATUS, emptyRecipe } from './storage'
+import { CATEGORIES, STATUS, cleanRecipe, emptyRecipe } from './storage'
 import RecipeCard from './components/RecipeCard'
 import RecipeDetail from './components/RecipeDetail'
 import RecipeForm from './components/RecipeForm'
@@ -40,7 +40,7 @@ export default function App() {
   const doFetch = useCallback(() => {
     return fetchData()
       .then(({ recipes, plans, updatedAt }) => {
-        setRecipes(recipes)
+        setRecipes(recipes.map(cleanRecipe))
         setPlans(plans)
         setLoadError(null)
         knownUpdatedAt.current = updatedAt
@@ -208,7 +208,7 @@ export default function App() {
             setView('list')
           }}
         >
-          <span className="logo">N</span>
+          <span className="logo">灶</span>
           <div>
             <h1>Nico的小厨房</h1>
             <p>备菜 · 计划 · 记录</p>
@@ -381,9 +381,6 @@ export default function App() {
           onEdit={() => openEdit(active.id)}
           onDelete={() => handleDelete(active.id)}
           onPhotosChange={(photos) => updateRecipe(active.id, { photos })}
-          onToggleFavorite={() =>
-            updateRecipe(active.id, { favorite: !active.favorite })
-          }
         />
       )}
 

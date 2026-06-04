@@ -1,4 +1,4 @@
-import { CATEGORIES } from './storage'
+import { CATEGORIES, cleanTags } from './storage'
 
 // 后端代理地址：部署到 Vercel 时用相对路径 /api/generate-recipe 即可。
 // 如果前端和后端分开部署，可在 .env 里设 VITE_AI_API 指向后端完整地址。
@@ -26,9 +26,11 @@ export function normalizeRecipe(raw, fallbackName) {
     ? r.steps.map((s) => s.toString().trim()).filter(Boolean)
     : []
 
-  const tags = Array.isArray(r.tags)
-    ? r.tags.map((t) => t.toString().trim()).filter(Boolean).slice(0, 4)
-    : []
+  const tags = cleanTags(
+    Array.isArray(r.tags)
+      ? r.tags.map((t) => t.toString().trim()).filter(Boolean).slice(0, 4)
+      : [],
+  )
 
   return {
     id: uid(),

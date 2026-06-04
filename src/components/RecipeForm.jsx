@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CATEGORIES, STATUS } from '../storage'
+import { CATEGORIES, STATUS, cleanTags } from '../storage'
 import { useUI } from '../ui-context'
 
 export default function RecipeForm({ initial, onCancel, onSave }) {
@@ -76,6 +76,7 @@ export default function RecipeForm({ initial, onCancel, onSave }) {
     delete cleaned.time
     delete cleaned.servings
     delete cleaned.difficulty
+    cleaned.tags = cleanTags(cleaned.tags)
     onSave(cleaned)
   }
 
