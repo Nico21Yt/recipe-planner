@@ -232,29 +232,23 @@ export default function MealPlan({
 
       <section className="plan-card single">
         <div className="plan-card-head">
-          <div className="plan-date">
-            {isAte ? (
-              <label className="ate-date-pick">
-                <span className="sr-only">选择日期</span>
-                <input
-                  type="date"
-                  className="date-input ate-date-input"
-                  value={ateDate}
-                  max={today}
-                  onChange={(e) => {
-                    const v = e.target.value
-                    if (v && v <= today) setAteDate(v)
-                  }}
-                />
-              </label>
-            ) : (
-              <span className="rel">{dateRel}</span>
+          <div className={'plan-date' + (isAte ? ' plan-date-pickable' : '')}>
+            {isAte && (
+              <input
+                type="date"
+                className="plan-date-input-overlay"
+                value={ateDate}
+                max={today}
+                aria-label="选择日期"
+                onChange={(e) => {
+                  const v = e.target.value
+                  if (v && v <= today) setAteDate(v)
+                }}
+              />
             )}
+            <span className="rel">{dateRel}</span>
             <span className="md">{formatMD(targetDate)}</span>
             <span className="wd">{weekdayCN(targetDate)}</span>
-            {isAte && relativeDay(targetDate) && (
-              <span className="rel rel-muted">{relativeDay(targetDate)}</span>
-            )}
           </div>
         </div>
 
@@ -271,36 +265,15 @@ export default function MealPlan({
                     'dish-menu-item' + (isAte ? ' dish-menu-item-ate' : '')
                   }
                 >
-                  <div className="dish-menu-row">
-                    <span className="dish-menu-no" aria-hidden>
-                      {i + 1}
-                    </span>
-                    {isAte ? (
-                      <span className="dish-menu-name">{d.name}</span>
-                    ) : (
-                      <button
-                        type="button"
-                        className="dish-menu-name linked"
-                        onClick={() =>
-                          onOpenDish({ date: targetDate, dishId: d.id })
-                        }
-                      >
-                        {d.name}
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      className="dish-menu-dismiss"
-                      aria-label={'去掉「' + d.name + '」'}
-                      onClick={() => removeDish(d.id)}
-                    />
-                  </div>
-                  {isAte && (
+                  {isAte ? (
                     <DishPhotos
+                      variant="menu"
+                      index={i + 1}
                       dishName={d.name}
                       planDate={targetDate}
                       recipe={linkedRecipe}
                       dishPhotos={d.photos || []}
+                      onDismiss={() => removeDish(d.id)}
                       onDishPhotosChange={(photos) =>
                         updateDish(d.id, { photos })
                       }
@@ -314,6 +287,27 @@ export default function MealPlan({
                           : undefined
                       }
                     />
+                  ) : (
+                    <div className="dish-menu-row">
+                      <span className="dish-menu-no" aria-hidden>
+                        {i + 1}
+                      </span>
+                      <button
+                        type="button"
+                        className="dish-menu-name linked"
+                        onClick={() =>
+                          onOpenDish({ date: targetDate, dishId: d.id })
+                        }
+                      >
+                        {d.name}
+                      </button>
+                      <button
+                        type="button"
+                        className="dish-menu-dismiss"
+                        aria-label={'去掉「' + d.name + '」'}
+                        onClick={() => removeDish(d.id)}
+                      />
+                    </div>
                   )}
                 </li>
               )

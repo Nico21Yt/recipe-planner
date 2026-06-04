@@ -108,9 +108,9 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
                 {entry.dishRows.length > 0 ? (
                   <div className="diary-dish-list">
                     {entry.dishRows.map(({ dish, photos }) => (
-                      <div key={dish.id} className="diary-dish-block">
-                        <span className="diary-dish-tag">{dish.name}</span>
-                        {photos.length > 0 ? (
+                      <div key={dish.id} className="diary-dish-row">
+                        <div className="diary-dish-name">{dish.name}</div>
+                        {photos.length > 0 && (
                           <div className="photo-grid photo-grid-compact">
                             {photos.map((p, i) => (
                               <figure key={p.id} className="photo-item">
@@ -129,8 +129,9 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
                               </figure>
                             ))}
                           </div>
-                        ) : (
-                          <p className="hint diary-dish-no-photo">暂无照片</p>
+                        )}
+                        {hasAnyPhoto && photos.length === 0 && (
+                          <p className="diary-dish-no-photo">暂无照片</p>
                         )}
                       </div>
                     ))}
@@ -163,7 +164,9 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
                   <p className="hint">这天还没有记录~</p>
                 )}
                 {!hasAnyPhoto && entry.dishRows.length > 0 && (
-                  <p className="hint">这天还没拍照，可在「吃过什么」里添加。</p>
+                  <p className="hint diary-day-hint">
+                    可在「吃过什么」中补充照片。
+                  </p>
                 )}
               </div>
             </section>

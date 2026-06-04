@@ -4,6 +4,26 @@ import { uploadPhoto, deletePhotoBlob } from '../cloud'
 import { useUI } from '../ui-context'
 import Lightbox from './Lightbox'
 
+function CameraIcon() {
+  return (
+    <svg
+      className="dish-photo-icon-svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+  )
+}
+
 /** 计划里某道菜的照片：有菜谱则写入菜谱并按计划日期归类；无菜谱则存在 dish.photos */
 export default function DishPhotos({
   dishName,
@@ -12,7 +32,9 @@ export default function DishPhotos({
   dishPhotos = [],
   onDishPhotosChange,
   onRecipePhotosChange,
-  compact = true,
+  variant = 'block',
+  index,
+  onDismiss,
 }) {
   const { toast, confirm } = useUI()
   const inputRef = useRef(null)
@@ -28,6 +50,7 @@ export default function DishPhotos({
     : dishPhotos
 
   const defaultDateIso = planDate + 'T12:00:00'
+  const menuLayout = variant === 'menu'
 
   async function handleFiles(e) {
     const files = Array.from(e.target.files || [])
@@ -76,8 +99,102 @@ export default function DishPhotos({
     caption: p.caption || dishName,
   }))
 
+  const addIconBtn = (
+    <button
+      type="button"
+      className={
+        'dish-photo-icon-btn' +
+        (photos.length > 0 ? ' has-photos' : '') +
+        (busy ? ' busy' : '')
+      }
+      disabled={busy}
+      aria-label={photos.length > 0 ? '继续添加照片' : '添加照片'}
+      onClick={() => inputRef.current?.click()}
+    >
+      {busy ? <span className="dish-photo-icon-busy">…</span> : <CameraIcon />}
+      {photos.length > 0 && (
+        <span className="dish-photo-count" aria-hidden>
+          {photos.length}
+        </span>
+      )}
+    </button>
+  )
+
+  const fileInput = (
+    <input
+      ref={inputRef}
+      type="file"
+      accept="image/*"
+      multiple
+      hidden
+      onChange={handleFiles}
+    />
+  )
+
+  const thumbStrip =
+    photos.length > 0 ? (
+      <div className="dish-photos-strip">
+        {photos.map((p, i) => (
+          <button
+            key={p.id}
+            type="button"
+            className="dish-photo-thumb"
+            onClick={() => setLightboxIndex(i)}
+          >
+            <img src={p.src} alt={dishName} loading="lazy" />
+          </button>
+        ))}
+      </div>
+    ) : null
+
+  const lightbox =
+    lightboxIndex != null ? (
+      <Lightbox
+        photos={lightboxPhotos}
+        startIndex={lightboxIndex}
+        onClose={() => setLightboxIndex(null)}
+        renderBar={() => (
+          <div className="lightbox-bar">
+            <strong>{dishName}</strong>
+            <button
+              type="button"
+              className="btn danger small"
+              onClick={() => deletePhoto(lightboxPhotos[lightboxIndex].id)}
+            >
+              删除
+            </button>
+          </div>
+        )}
+      />
+    ) : null
+
+  if (menuLayout) {
+    return (
+      <div className="dish-photos-menu">
+        <div className="dish-menu-row dish-menu-row-ate">
+          <span className="dish-menu-no" aria-hidden>
+            {index}
+          </span>
+          <span className="dish-menu-name">{dishName}</span>
+          <div className="dish-menu-actions">
+            {addIconBtn}
+            {fileInput}
+            <button
+              type="button"
+              className="dish-menu-dismiss"
+              aria-label={'去掉「' + dishName + '」'}
+              onClick={onDismiss}
+            />
+          </div>
+        </div>
+        {thumbStrip}
+        {lightbox}
+      </div>
+    )
+  }
+
   return (
-    <div className={'dish-photos' + (compact ? ' dish-photos-compact' : '')}>
+    <div className="dish-photos dish-photos-block">
       <div className="dish-photos-row">
         {photos.map((p, i) => (
           <button
@@ -97,38 +214,9 @@ export default function DishPhotos({
         >
           {busy ? '…' : photos.length > 0 ? '+ 照片' : '添加照片'}
         </button>
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          hidden
-          onChange={handleFiles}
-        />
+        {fileInput}
       </div>
-      {recipe && (
-        <p className="hint dish-photos-hint">已关联菜谱，照片会同步到菜谱里。</p>
-      )}
-
-      {lightboxIndex != null && (
-        <Lightbox
-          photos={lightboxPhotos}
-          startIndex={lightboxIndex}
-          onClose={() => setLightboxIndex(null)}
-          renderBar={() => (
-            <div className="lightbox-bar">
-              <strong>{dishName}</strong>
-              <button
-                type="button"
-                className="btn danger small"
-                onClick={() => deletePhoto(lightboxPhotos[lightboxIndex].id)}
-              >
-                删除
-              </button>
-            </div>
-          )}
-        />
-      )}
+      {lightbox}
     </div>
   )
 }
