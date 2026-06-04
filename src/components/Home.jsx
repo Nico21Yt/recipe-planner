@@ -1,6 +1,7 @@
 import { dayOf, todayStr } from '../storage'
+import PullToRefresh from './PullToRefresh'
 
-export default function Home({ recipes, plans, onPick }) {
+export default function Home({ recipes, plans, onPick, onRefresh }) {
   const today = todayStr()
 
   const recipeCount = recipes.length
@@ -39,7 +40,7 @@ export default function Home({ recipes, plans, onPick }) {
   ]
 
   return (
-    <main className="content home">
+    <PullToRefresh className="content home" onRefresh={onRefresh}>
       <div className="home-hero">
         <span className="home-kicker">灶感 · 新手厨房手记</span>
         <h2>
@@ -62,6 +63,6 @@ export default function Home({ recipes, plans, onPick }) {
           </button>
         ))}
       </div>
-    </main>
+    </PullToRefresh>
   )
 }

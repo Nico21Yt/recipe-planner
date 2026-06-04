@@ -39,21 +39,35 @@ export default function App() {
   const saveTimer = useRef(null)
   const knownUpdatedAt = useRef(0)
 
+  const applyRemote = useCallback(({ recipes, plans, updatedAt }) => {
+    setRecipes(recipes.map(cleanRecipe))
+    setPlans(normalizePlans(plans))
+    setLoadError(null)
+    knownUpdatedAt.current = updatedAt
+    setHasUpdate(false)
+  }, [])
+
   const doFetch = useCallback(() => {
     return fetchData()
-      .then(({ recipes, plans, updatedAt }) => {
-        setRecipes(recipes.map(cleanRecipe))
-        setPlans(normalizePlans(plans))
-        setLoadError(null)
-        knownUpdatedAt.current = updatedAt
-        setHasUpdate(false)
-      })
+      .then(applyRemote)
       .catch((e) => setLoadError(e.message))
       .finally(() => {
         setLoading(false)
         loadedRef.current = true
       })
-  }, [])
+  }, [applyRemote])
+
+  const refreshFromCloud = useCallback(() => {
+    return fetchData()
+      .then((data) => {
+        applyRemote(data)
+        toast('已更新到最新', 'success', 2200)
+      })
+      .catch((e) => {
+        toast('刷新失败：' + e.message, 'error', 3500)
+        throw e
+      })
+  }, [applyRemote, toast])
 
   function retryLoad() {
     setLoading(true)
@@ -325,6 +339,7 @@ export default function App() {
         <Home
           recipes={recipes}
           plans={plans}
+          onRefresh={refreshFromCloud}
           onPick={(id) => {
             setTab(id)
             if (id === 'recipes') setView('list')
