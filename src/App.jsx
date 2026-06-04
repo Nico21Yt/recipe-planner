@@ -282,16 +282,6 @@ export default function App() {
         <div className="topbar-actions">
           {tab !== 'home' && (
             <nav className="tabs">
-              {!loading && !loadError && (
-                <button
-                  type="button"
-                  className={'tab tab-sync' + (syncing ? ' syncing' : '')}
-                  disabled={syncing}
-                  onClick={() => refreshFromCloud().catch(() => {})}
-                >
-                  {syncing ? '同步中…' : '同步'}
-                </button>
-              )}
               {TABS.map((t) => (
                 <button
                   key={t.id}

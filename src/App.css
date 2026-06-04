@@ -108,20 +108,6 @@
   gap: 8px;
   flex-wrap: wrap;
 }
-.tab-sync {
-  flex-shrink: 0;
-  cursor: pointer;
-}
-.tab-sync:disabled {
-  opacity: 0.55;
-  cursor: wait;
-}
-.tab-sync.syncing {
-  color: var(--muted);
-}
-.tab-sync.active::after {
-  transform: scaleX(0);
-}
 .wechat-banner {
   display: flex;
   align-items: flex-start;
