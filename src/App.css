@@ -1405,39 +1405,40 @@
 }
 .plan-date-pickable {
   position: relative;
-}
-.plan-date-btn {
   display: flex;
   align-items: baseline;
   gap: 8px;
   margin: 0;
   padding: 2px 4px;
-  border: none;
   border-radius: 8px;
-  background: transparent;
-  font: inherit;
-  color: inherit;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.plan-date-btn:focus-visible {
+.plan-date-pickable:focus-within {
   outline: 2px solid rgba(58, 107, 67, 0.45);
   outline-offset: 2px;
 }
-.plan-date-btn:active {
-  opacity: 0.85;
+.plan-date-pickable .rel,
+.plan-date-pickable .md,
+.plan-date-pickable .wd {
+  position: relative;
+  z-index: 0;
+  pointer-events: none;
 }
 .plan-date-input-native {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
   padding: 0;
   border: 0;
   opacity: 0;
-  pointer-events: none;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  cursor: pointer;
+  font-size: 16px;
+  -webkit-appearance: none;
+  appearance: none;
 }
 .sr-only {
   position: absolute;

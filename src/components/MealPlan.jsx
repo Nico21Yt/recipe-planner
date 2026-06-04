@@ -27,19 +27,6 @@ export default function MealPlan({
   const [listOpen, setListOpen] = useState(false)
   const comboRef = useRef(null)
   const inputRef = useRef(null)
-  const ateDateRef = useRef(null)
-
-  function openAteDatePicker() {
-    const el = ateDateRef.current
-    if (!el) return
-    try {
-      if (typeof el.showPicker === 'function') el.showPicker()
-      else el.click()
-    } catch {
-      el.click()
-    }
-  }
-
   const isAte = which === 'ate'
   const targetDate = isAte
     ? ateDate
@@ -245,31 +232,22 @@ export default function MealPlan({
       <section className="plan-card single">
         <div className="plan-card-head">
           {isAte ? (
-            <div className="plan-date plan-date-pickable">
-              <button
-                type="button"
-                className="plan-date-btn"
-                onClick={openAteDatePicker}
-                aria-label={'选择日期，当前 ' + formatMD(targetDate)}
-              >
-                <span className="rel">{dateRel}</span>
-                <span className="md">{formatMD(targetDate)}</span>
-                <span className="wd">{weekdayCN(targetDate)}</span>
-              </button>
+            <label className="plan-date plan-date-pickable">
+              <span className="rel">{dateRel}</span>
+              <span className="md">{formatMD(targetDate)}</span>
+              <span className="wd">{weekdayCN(targetDate)}</span>
               <input
-                ref={ateDateRef}
                 type="date"
                 className="plan-date-input-native"
                 value={ateDate}
                 max={today}
-                tabIndex={-1}
-                aria-hidden
+                aria-label={'选择日期，当前 ' + formatMD(targetDate)}
                 onChange={(e) => {
                   const v = e.target.value
                   if (v && v <= today) setAteDate(v)
                 }}
               />
-            </div>
+            </label>
           ) : (
             <div className="plan-date">
               <span className="rel">{dateRel}</span>
