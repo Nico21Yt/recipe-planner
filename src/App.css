@@ -2393,7 +2393,10 @@
 
   .topbar {
     flex-shrink: 0;
-    padding: calc(6px + var(--safe-top)) var(--mobile-gutter) 6px;
+    padding-top: calc(6px + var(--safe-top));
+    padding-bottom: 6px;
+    padding-left: calc(var(--mobile-page-pad) + var(--safe-left));
+    padding-right: calc(var(--mobile-page-pad) + var(--safe-right));
     gap: 8px;
     background: transparent;
     border-bottom: none;
@@ -2429,7 +2432,10 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     scroll-behavior: auto;
-    padding: 12px var(--mobile-gutter) var(--mobile-nav-clearance);
+    padding-top: 12px;
+    padding-bottom: var(--mobile-nav-clearance);
+    padding-left: calc(var(--mobile-page-pad) + var(--safe-left));
+    padding-right: calc(var(--mobile-page-pad) + var(--safe-right));
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -2453,7 +2459,10 @@
     right: 0;
     bottom: 0;
     z-index: 100;
-    padding: 8px var(--mobile-gutter) calc(8px + var(--safe-bottom));
+    padding-top: 8px;
+    padding-bottom: calc(8px + var(--safe-bottom));
+    padding-left: calc(var(--mobile-page-pad) + var(--safe-left));
+    padding-right: calc(var(--mobile-page-pad) + var(--safe-right));
     background: linear-gradient(
       to top,
       var(--paper) 0%,
@@ -2540,13 +2549,16 @@
 
   .content.home {
     padding-bottom: calc(var(--mobile-nav-clearance) + 12px);
+    padding-left: calc(var(--mobile-page-pad) + var(--safe-left));
+    padding-right: calc(var(--mobile-page-pad) + var(--safe-right));
   }
 
   .home,
   .ptr-host.home .ptr-inner {
     min-height: 0;
     justify-content: flex-start;
-    padding: 0 0 8px;
+    padding-top: 0;
+    padding-bottom: 8px;
   }
 
   .home-hero {
@@ -2635,15 +2647,15 @@
 
   .update-banner {
     flex-shrink: 0;
-    margin-left: var(--mobile-gutter);
-    margin-right: var(--mobile-gutter);
-    width: calc(100% - var(--mobile-gutter) * 2);
+    margin-left: calc(var(--mobile-page-pad) + var(--safe-left));
+    margin-right: calc(var(--mobile-page-pad) + var(--safe-right));
+    width: auto;
     box-sizing: border-box;
   }
 
   .wechat-banner {
-    padding-left: var(--mobile-gutter);
-    padding-right: var(--mobile-gutter);
+    padding-left: calc(var(--mobile-page-pad) + var(--safe-left));
+    padding-right: calc(var(--mobile-page-pad) + var(--safe-right));
   }
 
   .dish-menu-item,

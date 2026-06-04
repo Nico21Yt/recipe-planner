@@ -42,7 +42,7 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
-  --mobile-gutter: max(20px, var(--safe-left), var(--safe-right));
+  --mobile-page-pad: 24px;
   --mobile-nav-clearance: calc(96px + var(--safe-bottom));
   /* 桌面：左上略深绿；手机在 App.css 里覆盖，避免灵动岛一带偏冷发暗 */
   --page-gradient: radial-gradient(
