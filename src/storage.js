@@ -84,20 +84,11 @@ export function emptyPlan(date) {
   }
 }
 
-export const PREP_STATUS = {
-  todo: { label: '待备菜', color: '#cf9a2c' },
-  shopping: { label: '已买齐', color: '#5a7a9a' },
-  prepping: { label: '备菜中', color: '#c5562a' },
-  ready: { label: '已备好', color: '#3c6e47' },
-}
-
 export function normalizePrep(prep) {
-  const status =
-    prep?.status && PREP_STATUS[prep.status] ? prep.status : 'todo'
   const checked = Array.isArray(prep?.checked)
     ? [...new Set(prep.checked.filter((n) => Number.isInteger(n) && n >= 0))]
     : []
-  return { status, checked, note: (prep?.note || '').toString() }
+  return { checked }
 }
 
 export function normalizeDish(dish) {

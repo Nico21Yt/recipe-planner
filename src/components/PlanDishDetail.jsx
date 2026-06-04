@@ -1,10 +1,4 @@
-import {
-  PREP_STATUS,
-  formatMD,
-  normalizePrep,
-  relativeDay,
-  weekdayCN,
-} from '../storage'
+import { formatMD, normalizePrep, relativeDay, weekdayCN } from '../storage'
 import RecipePhotos from './RecipePhotos'
 
 export default function PlanDishDetail({
@@ -48,41 +42,9 @@ export default function PlanDishDetail({
         </div>
         <h2>{dish.name}</h2>
         <p className="section-sub plan-dish-kicker">
-          这一天的备菜进度会同步到云端，照片仍挂在菜谱上。
+          材料勾选会同步到云端，照片仍挂在菜谱上。
         </p>
       </div>
-
-      <section className="panel prep-panel">
-        <h3>备菜进度</h3>
-        <div className="prep-status-row">
-          {Object.entries(PREP_STATUS).map(([key, st]) => (
-            <button
-              key={key}
-              type="button"
-              className={
-                'prep-status-btn' + (prep.status === key ? ' active' : '')
-              }
-              style={
-                prep.status === key
-                  ? { borderColor: st.color, background: st.color + '22' }
-                  : undefined
-              }
-              onClick={() => setPrep({ status: key })}
-            >
-              {st.label}
-            </button>
-          ))}
-        </div>
-        <label className="prep-note-field">
-          <span>今日备注</span>
-          <textarea
-            rows={2}
-            placeholder="例如：牛肉先腌、蔬菜明早再买…"
-            value={prep.note}
-            onChange={(e) => setPrep({ note: e.target.value })}
-          />
-        </label>
-      </section>
 
       {recipe ? (
         <>
@@ -136,7 +98,7 @@ export default function PlanDishDetail({
       ) : (
         <section className="panel">
           <p className="hint">
-            这道菜还没有关联菜谱，只能在计划里记备菜状态。添加时从菜谱选择或生成菜谱后会显示材料和步骤。
+            这道菜还没有关联菜谱。添加时从菜谱选择或生成菜谱后会显示材料和步骤。
           </p>
         </section>
       )}

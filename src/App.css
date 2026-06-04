@@ -1215,7 +1215,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-top: 16px;
 }
 .chef-note-label {
   font-size: 13px;
@@ -1278,54 +1278,6 @@
 .plan-dish-kicker {
   margin: 8px 0 0;
 }
-.prep-panel h3 {
-  margin-bottom: 12px;
-}
-.prep-status-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-.prep-status-btn {
-  border: 1.5px solid var(--line);
-  border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 700;
-  background: var(--paper);
-  color: var(--ink-2);
-  cursor: pointer;
-}
-.prep-status-btn.active {
-  color: var(--ink);
-}
-.prep-note-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.prep-note-field span {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--ink-2);
-}
-.prep-note-field textarea {
-  width: 100%;
-  resize: vertical;
-  min-height: 56px;
-  padding: 10px 12px;
-  font-family: var(--font-body);
-  font-size: 15px;
-  border: 1.5px solid var(--line);
-  border-radius: 10px;
-  background: var(--bg);
-  box-sizing: border-box;
-}
-.prep-note-field textarea:focus {
-  outline: none;
-  border-color: var(--green);
-}
 .panel-head-row {
   display: flex;
   align-items: baseline;
@@ -1360,8 +1312,10 @@
   position: relative;
   flex: 1;
   display: flex;
+  min-width: 0;
 }
-.combo .dish-input {
+.combo .dish-input,
+.combo-trigger {
   flex: 1;
   width: 100%;
   padding-right: 40px;
@@ -1369,12 +1323,65 @@
   font-size: 16px;
   font-weight: 600;
   letter-spacing: -0.01em;
+  text-align: left;
+  box-sizing: border-box;
 }
 .combo .dish-input::placeholder {
   font-family: var(--font-body);
   font-weight: 400;
   letter-spacing: 0;
   color: var(--muted);
+}
+.combo-trigger {
+  cursor: pointer;
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+}
+.combo-trigger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.combo-trigger-label {
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.combo-menu-bar {
+  padding: 4px 6px 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+.combo-back {
+  border: none;
+  background: transparent;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green-deep);
+  cursor: pointer;
+}
+.combo-menu-footer {
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+  padding-top: 4px;
+}
+.combo-type-new {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--terracotta-deep);
+  cursor: pointer;
+}
+.combo-type-new:hover,
+.combo-back:hover {
+  background: var(--bg);
 }
 .combo-arrow {
   position: absolute;
