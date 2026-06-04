@@ -1492,14 +1492,18 @@
   flex-direction: column;
   gap: 8px;
 }
-.dish-menu-item {
+.dish-menu-item:not(.dish-menu-item-ate) {
   display: grid;
   grid-template-columns: 22px 1fr 28px;
   align-items: center;
   gap: 8px;
 }
 .dish-menu-item-ate {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 100%;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
 }
@@ -1514,11 +1518,26 @@
   gap: 8px;
 }
 .dish-menu-row-ate {
-  grid-template-columns: 22px minmax(0, 1fr) auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+}
+.dish-menu-row-ate .dish-menu-no {
+  flex: 0 0 22px;
 }
 .dish-menu-row-ate .dish-menu-name {
+  flex: 1 1 0;
   min-width: 0;
-  overflow-wrap: anywhere;
+  max-width: 100%;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  writing-mode: horizontal-tb;
+}
+.dish-menu-row-ate .dish-menu-actions {
+  flex: 0 0 auto;
 }
 .dish-menu-actions {
   display: flex;
@@ -1530,6 +1549,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 .dish-photos-strip {
   display: flex;
@@ -2463,5 +2485,26 @@
 
   .update-banner {
     flex-shrink: 0;
+  }
+
+  .dish-menu-item-ate,
+  .dish-photos-menu,
+  .dish-menu-row-ate {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .dish-menu-row-ate {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+
+  .dish-menu-row-ate .dish-menu-name {
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: normal;
+    writing-mode: horizontal-tb;
+    overflow-wrap: break-word;
   }
 }
