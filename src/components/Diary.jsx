@@ -130,9 +130,6 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
                             ))}
                           </div>
                         )}
-                        {hasAnyPhoto && photos.length === 0 && (
-                          <p className="diary-dish-no-photo">暂无照片</p>
-                        )}
                       </div>
                     ))}
                   </div>
