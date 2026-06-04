@@ -38,7 +38,7 @@
    - **Blob** → 注入 `BLOB_READ_WRITE_TOKEN`
 5. 进 **Settings → Environment Variables** 添加：
    - `OPENAI_API_KEY` = 你的 OpenAI key（**必填**）
-   - `OPENAI_MODEL` = `gpt-5.4`（可选，默认就是它）
+   - `OPENAI_MODEL` = `gpt-5.4-mini`（可选，默认就是它）
 6. 回到 **Deployments**，对最新一条点 ⋯ → **Redeploy**（让新环境变量生效）
 
 完成后访问 Vercel 给的地址，AI 生成 + 云端共享都可用。之后每次 push 会自动重新部署。

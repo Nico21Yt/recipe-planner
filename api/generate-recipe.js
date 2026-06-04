@@ -3,7 +3,7 @@
 //
 // 需要在 Vercel 项目设置里配置环境变量：
 //   OPENAI_API_KEY  你的 OpenAI key（必填）
-//   OPENAI_MODEL    模型名，默认 gpt-5.4（可选）
+//   OPENAI_MODEL    模型名，默认 gpt-5.4-mini（可选）
 //   OPENAI_BASE_URL 接口地址，默认 https://api.openai.com/v1（可选，用代理时改）
 
 const CATEGORIES = ['家常菜', '汤羹', '主食', '甜点', '凉菜', '早餐', '其他']
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
     return
   }
 
-  const model = process.env.OPENAI_MODEL || 'gpt-5.4'
+  const model = process.env.OPENAI_MODEL || 'gpt-5.4-mini'
   const baseUrl = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1'
 
   try {
