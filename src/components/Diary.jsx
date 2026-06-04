@@ -73,27 +73,32 @@ export default function Diary({ plans, recipes, onOpenPlanDish, onOpenRecipe }) 
           const rel = relativeDay(entry.date)
           return (
             <section className="diary-day" key={entry.date}>
-              <div className="diary-date">
+              <header className="diary-date">
                 <span className="diary-md">{formatMD(entry.date)}</span>
                 <span className="diary-wd">{weekdayCN(entry.date)}</span>
                 {rel && <span className="diary-rel">{rel}</span>}
-              </div>
+              </header>
 
               <div className="diary-body">
                 {entry.dishes.length > 0 && (
-                  <div className="diary-dishes">
+                  <ul className="diary-dish-list">
                     {entry.dishes.map((d) => (
-                      <span
-                        key={d.id}
-                        className="dish-chip linked"
-                        onClick={() =>
-                          onOpenPlanDish({ date: entry.date, dishId: d.id })
-                        }
-                      >
-                        {d.name}
-                      </span>
+                      <li key={d.id}>
+                        <button
+                          type="button"
+                          className="diary-dish-name"
+                          onClick={() =>
+                            onOpenPlanDish({
+                              date: entry.date,
+                              dishId: d.id,
+                            })
+                          }
+                        >
+                          {d.name}
+                        </button>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 )}
 
                 {entry.photos.length > 0 ? (
