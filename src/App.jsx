@@ -1,66 +1,72 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { STATUS, cleanRecipe, emptyRecipe, normalizePlans } from './storage'
+import { lazy, Suspense, useCallback, useMemo, useRef, useState } from 'react'
+import { STATUS, cleanRecipe, emptyRecipe } from './storage'
 import RecipeCard from './components/RecipeCard'
 import RecipeDetail from './components/RecipeDetail'
-import RecipeForm from './components/RecipeForm'
-import MealPlan from './components/MealPlan'
-import PlanDishDetail from './components/PlanDishDetail'
-import Diary from './components/Diary'
 import Home from './components/Home'
+import PageHeader from './components/PageHeader'
+import WeChatBanner from './components/WeChatBanner'
 import { generateRecipe, modifyRecipe } from './ai'
-import { fetchData, saveData, CLIENT_ID } from './cloud'
+import { fetchData } from './cloud'
 import { useUI } from './ui-context'
 import { applyAppUpdateIfNeeded } from './appUpdate'
 import { APP_VERSION } from './version'
+import { useKitchenData } from './hooks/useKitchenData'
 import './App.css'
+
+const MealPlan = lazy(() => import('./components/MealPlan'))
+const PlanDishDetail = lazy(() => import('./components/PlanDishDetail'))
+const Diary = lazy(() => import('./components/Diary'))
+const RecipeForm = lazy(() => import('./components/RecipeForm'))
 
 const TABS = [
   { id: 'recipes', label: '菜谱', short: '菜谱' },
-  { id: 'plan', label: '明天吃什么', short: '吃什么' },
+  { id: 'plan', label: '吃什么', short: '吃什么' },
   { id: 'diary', label: '做饭日记', short: '日记' },
 ]
 
+const BRAND = '尼的小厨房'
+
+function TabFallback() {
+  return (
+    <main className="content state-screen">
+      <div className="spinner" />
+    </main>
+  )
+}
+
 export default function App() {
   const { toast, confirm } = useUI()
+  const {
+    recipes,
+    setRecipes,
+    plans,
+    setPlans,
+    loading,
+    loadError,
+    saveState,
+    hasUpdate,
+    doFetch,
+    applyRemote,
+    retryLoad,
+  } = useKitchenData()
+
   const [tab, setTab] = useState('home')
-  const [recipes, setRecipes] = useState([])
-  const [plans, setPlans] = useState([])
-  const [view, setView] = useState('list') // list | detail | form
+  const [view, setView] = useState('list')
   const [activeId, setActiveId] = useState(null)
-  const [planDish, setPlanDish] = useState(null) // { date, dishId }
+  const [planDish, setPlanDish] = useState(null)
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [genInput, setGenInput] = useState('')
   const [genBusy, setGenBusy] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [loadError, setLoadError] = useState(null)
-  const [saveState, setSaveState] = useState('idle') // idle | saving | saved | error
-  const [hasUpdate, setHasUpdate] = useState(false) // 云端有他人的新改动
-  const loadedRef = useRef(false)
-  const saveTimer = useRef(null)
-  const knownUpdatedAt = useRef(0)
+  const [syncing, setSyncing] = useState(false)
+  const [aiBarOpen, setAiBarOpen] = useState(
+    () => !window.matchMedia('(max-width: 720px)').matches,
+  )
   const lastRefreshToastAt = useRef(0)
   const REFRESH_TOAST_GAP_MS = 8000
 
-  const applyRemote = useCallback(({ recipes, plans, updatedAt }) => {
-    setRecipes(recipes.map(cleanRecipe))
-    setPlans(normalizePlans(plans))
-    setLoadError(null)
-    knownUpdatedAt.current = updatedAt
-    setHasUpdate(false)
-  }, [])
-
-  const doFetch = useCallback(() => {
-    return fetchData()
-      .then(applyRemote)
-      .catch((e) => setLoadError(e.message))
-      .finally(() => {
-        setLoading(false)
-        loadedRef.current = true
-      })
-  }, [applyRemote])
-
   const refreshFromCloud = useCallback(async () => {
+    setSyncing(true)
     try {
       const data = await fetchData()
       applyRemote(data)
@@ -74,57 +80,15 @@ export default function App() {
       const now = Date.now()
       if (now - lastRefreshToastAt.current >= REFRESH_TOAST_GAP_MS) {
         lastRefreshToastAt.current = now
-        toast('已更新到最新', 'success', 2200)
+        toast('已同步到最新', 'success', 2200)
       }
     } catch (e) {
-      toast('刷新失败：' + e.message, 'error', 3500)
+      toast('同步失败：' + e.message, 'error', 3500)
       throw e
+    } finally {
+      setSyncing(false)
     }
   }, [applyRemote, toast])
-
-  function retryLoad() {
-    setLoading(true)
-    setLoadError(null)
-    doFetch()
-  }
-
-  useEffect(() => {
-    doFetch()
-  }, [doFetch])
-
-  // 任意改动后，防抖保存整份数据到云端
-  useEffect(() => {
-    if (!loadedRef.current) return
-    if (saveTimer.current) clearTimeout(saveTimer.current)
-    setSaveState('saving')
-    saveTimer.current = setTimeout(() => {
-      saveData({ recipes, plans })
-        .then((updatedAt) => {
-          setSaveState('saved')
-          knownUpdatedAt.current = updatedAt
-        })
-        .catch(() => setSaveState('error'))
-    }, 600)
-    return () => saveTimer.current && clearTimeout(saveTimer.current)
-  }, [recipes, plans])
-
-  // 定时轮询：发现别人改了云端，就提示刷新（不强行覆盖正在编辑的内容）
-  useEffect(() => {
-    const id = setInterval(() => {
-      if (!loadedRef.current) return
-      fetchData()
-        .then((remote) => {
-          if (
-            remote.updatedAt > knownUpdatedAt.current &&
-            remote.clientId !== CLIENT_ID
-          ) {
-            setHasUpdate(true)
-          }
-        })
-        .catch(() => {})
-    }, 25000)
-    return () => clearInterval(id)
-  }, [])
 
   const active = recipes.find((r) => r.id === activeId) || null
 
@@ -251,7 +215,10 @@ export default function App() {
   }
 
   async function handleDelete(id) {
-    const ok = await confirm('确定要删除这道菜吗？', { danger: true, confirmText: '删除' })
+    const ok = await confirm('确定要删除这道菜吗？', {
+      danger: true,
+      confirmText: '删除',
+    })
     if (!ok) return
     setRecipes((prev) => prev.filter((r) => r.id !== id))
     setView('list')
@@ -283,6 +250,15 @@ export default function App() {
     )
   }
 
+  const saveHint =
+    saveState === 'saving'
+      ? '保存中'
+      : saveState === 'saved'
+        ? '已保存'
+        : saveState === 'error'
+          ? '保存失败'
+          : ''
+
   return (
     <div className="app">
       <header className="topbar">
@@ -297,7 +273,7 @@ export default function App() {
           <span className="logo">灶</span>
           <div>
             <div className="brand-title-row">
-              <h1>Nico的小厨房</h1>
+              <h1>{BRAND}</h1>
               <span className="app-version" title="应用版本">
                 v{APP_VERSION}
               </span>
@@ -306,29 +282,48 @@ export default function App() {
           </div>
         </div>
 
-        {tab !== 'home' && (
-          <nav className="tabs">
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                className={'tab' + (tab === t.id ? ' active' : '')}
-                onClick={() => {
-                  setTab(t.id)
-                  if (t.id === 'recipes') setView('list')
-                  setPlanDish(null)
-                }}
-              >
-                {t.label}
-              </button>
-            ))}
-          </nav>
-        )}
-
+        <div className="topbar-actions">
+          {!loading && !loadError && tab !== 'home' && (
+            <button
+              type="button"
+              className="btn ghost small topbar-sync"
+              disabled={syncing}
+              onClick={() => refreshFromCloud().catch(() => {})}
+            >
+              {syncing ? '同步中…' : '同步'}
+            </button>
+          )}
+          {tab !== 'home' && (
+            <nav className="tabs">
+              {TABS.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  className={'tab' + (tab === t.id ? ' active' : '')}
+                  onClick={() => {
+                    setTab(t.id)
+                    if (t.id === 'recipes') setView('list')
+                    setPlanDish(null)
+                  }}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </nav>
+          )}
+        </div>
       </header>
 
-      {hasUpdate && (
-        <button className="update-banner" onClick={() => doFetch()}>
-          有新的改动，点击刷新查看
+      <WeChatBanner />
+
+      {hasUpdate && !loading && !loadError && (
+        <button
+          type="button"
+          className="update-banner"
+          disabled={syncing}
+          onClick={() => refreshFromCloud().catch(() => {})}
+        >
+          云端有更新，点击同步数据与版本
         </button>
       )}
 
@@ -342,7 +337,7 @@ export default function App() {
       {!loading && loadError && (
         <main className="content state-screen">
           <p className="state-error">加载失败：{loadError}</p>
-          <button className="btn primary" onClick={retryLoad}>
+          <button type="button" className="btn primary" onClick={retryLoad}>
             重试
           </button>
         </main>
@@ -361,70 +356,87 @@ export default function App() {
       )}
 
       {!loading && !loadError && tab === 'plan' && planDishCtx && (
-        <PlanDishDetail
-          date={planDishCtx.date}
-          dish={planDishCtx.dish}
-          recipe={planDishCtx.recipe}
-          onBack={() => setPlanDish(null)}
-          onPrepChange={(prep) =>
-            updateDishPrep(planDishCtx.date, planDishCtx.dish.id, prep)
-          }
-          onPhotosChange={(photos) => {
-            if (planDishCtx.recipe) {
-              updateRecipePhotos(planDishCtx.recipe.id, photos)
+        <Suspense fallback={<TabFallback />}>
+          <PlanDishDetail
+            date={planDishCtx.date}
+            dish={planDishCtx.dish}
+            recipe={planDishCtx.recipe}
+            onBack={() => setPlanDish(null)}
+            onPrepChange={(prep) =>
+              updateDishPrep(planDishCtx.date, planDishCtx.dish.id, prep)
             }
-          }}
-        />
+            onPhotosChange={(photos) => {
+              if (planDishCtx.recipe) {
+                updateRecipePhotos(planDishCtx.recipe.id, photos)
+              }
+            }}
+          />
+        </Suspense>
       )}
 
       {!loading && !loadError && tab === 'plan' && !planDishCtx && (
-        <MealPlan
-          plans={plans}
-          recipes={recipes}
-          onChange={setPlans}
-          onOpenDish={openPlanDish}
-          onGenerateRecipe={handleGenerate}
-        />
+        <Suspense fallback={<TabFallback />}>
+          <MealPlan
+            plans={plans}
+            recipes={recipes}
+            onChange={setPlans}
+            onOpenDish={openPlanDish}
+            onGenerateRecipe={handleGenerate}
+          />
+        </Suspense>
       )}
 
       {!loading && !loadError && tab === 'diary' && (
-        <Diary
-          plans={plans}
-          recipes={recipes}
-          onOpenRecipe={openRecipeFromTab}
-        />
+        <Suspense fallback={<TabFallback />}>
+          <Diary
+            plans={plans}
+            recipes={recipes}
+            onOpenRecipe={openRecipeFromTab}
+          />
+        </Suspense>
       )}
 
       {!loading && !loadError && tab === 'recipes' && view === 'list' && (
         <main className="content">
-          <div className="section-head">
-            <div>
-              <h2>我的菜谱</h2>
-              <p className="section-sub">输入菜名，AI 帮你生成新手菜谱。</p>
-            </div>
-          </div>
+          <PageHeader
+            title="我的菜谱"
+            sub="输入菜名，AI 帮你生成新手菜谱。"
+          />
 
-          <div className="ai-bar">
-            <input
-              className="dish-input"
-              placeholder="想做什么菜？输入菜名，如 麻婆豆腐…"
-              value={genInput}
-              disabled={genBusy}
-              onChange={(e) => setGenInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  generateAndOpen()
-                }
-              }}
-            />
+          <div className={'ai-bar' + (aiBarOpen ? ' open' : '')}>
             <button
-              className="btn accent"
-              onClick={generateAndOpen}
-              disabled={genBusy || !genInput.trim()}
+              type="button"
+              className="ai-bar-toggle"
+              aria-expanded={aiBarOpen}
+              onClick={() => setAiBarOpen((o) => !o)}
             >
-              {genBusy ? 'AI 生成中…' : 'AI 生成菜谱'}
+              {aiBarOpen ? '收起 AI 生成' : 'AI 生成菜谱'}
             </button>
+            {aiBarOpen && (
+              <div className="ai-bar-body">
+                <input
+                  className="dish-input"
+                  placeholder="想做什么菜？如 麻婆豆腐…"
+                  value={genInput}
+                  disabled={genBusy}
+                  onChange={(e) => setGenInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      generateAndOpen()
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className="btn accent"
+                  onClick={generateAndOpen}
+                  disabled={genBusy || !genInput.trim()}
+                >
+                  {genBusy ? '生成中…' : '生成'}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="toolbar">
@@ -436,7 +448,10 @@ export default function App() {
             />
             <div className="filters">
               <div className="chip-group">
-                <Chip active={filterStatus === 'all'} onClick={() => setFilterStatus('all')}>
+                <Chip
+                  active={filterStatus === 'all'}
+                  onClick={() => setFilterStatus('all')}
+                >
                   全部 {counts.all}
                 </Chip>
                 {Object.entries(STATUS).map(([key, s]) => (
@@ -455,7 +470,7 @@ export default function App() {
 
           {filtered.length === 0 && !genBusy ? (
             <div className="empty">
-              <p>还没有菜谱，在上面输入菜名让 AI 帮你生成第一道吧！</p>
+              <p>还没有菜谱，展开上方 AI 生成第一道吧。</p>
             </div>
           ) : (
             <div className="grid">
@@ -480,24 +495,33 @@ export default function App() {
         <RecipeDetail
           recipe={active}
           onBack={() => setView('list')}
+          onEdit={() => openEdit(active.id)}
           onPhotosChange={(photos) => updateRecipePhotos(active.id, photos)}
           onAiModify={handleAiModify}
         />
       )}
 
       {!loading && !loadError && tab === 'recipes' && view === 'form' && (
-        <RecipeForm
-          initial={active || emptyRecipe()}
-          onCancel={() => setView(active ? 'detail' : 'list')}
-          onSave={handleSave}
-        />
+        <Suspense fallback={<TabFallback />}>
+          <RecipeForm
+            initial={active || emptyRecipe()}
+            onCancel={() => setView(active ? 'detail' : 'list')}
+            onSave={handleSave}
+          />
+        </Suspense>
       )}
 
       <nav className="bottom-nav" aria-label="主导航">
         <div className="bottom-nav-inner">
+          {saveHint && (
+            <span className={'bottom-nav-save save-' + saveState}>
+              {saveHint}
+            </span>
+          )}
           {[{ id: 'home', short: '首页' }, ...TABS].map((t) => (
             <button
               key={t.id}
+              type="button"
               className={'bn-item' + (tab === t.id ? ' active' : '')}
               onClick={() => {
                 setTab(t.id)
@@ -512,7 +536,7 @@ export default function App() {
       </nav>
 
       <footer className="foot">
-        Nico的小厨房 · 云端共享数据
+        {BRAND} · 云端共享数据
         {saveState === 'saving' && <span className="sync"> · 保存中…</span>}
         {saveState === 'saved' && <span className="sync ok"> · 已同步</span>}
         {saveState === 'error' && (
@@ -537,6 +561,7 @@ function SkeletonCard() {
 function Chip({ active, onClick, color, children }) {
   return (
     <button
+      type="button"
       className={'chip' + (active ? ' active' : '')}
       onClick={onClick}
       style={active && color ? { borderColor: color, color } : undefined}

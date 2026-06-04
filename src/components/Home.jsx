@@ -9,7 +9,7 @@ export default function Home({ recipes, plans, onPick, onRefresh }) {
 
   const diaryDays = new Set()
   plans.forEach((p) => {
-    if (p.date < today) diaryDays.add(p.date)
+    if (p.date < today || p.diary) diaryDays.add(p.date)
   })
   recipes.forEach((r) => {
     ;(r.photos || []).forEach((p) => {
@@ -27,8 +27,8 @@ export default function Home({ recipes, plans, onPick, onRefresh }) {
     },
     {
       id: 'plan',
-      title: '明天吃什么',
-      desc: '提前安排哪天做什么，从菜谱选或新增要做的菜',
+      title: '吃什么',
+      desc: '安排今天/明天，或用「吃过什么」补记外卖外食',
       stat: upcomingCount > 0 ? `${upcomingCount} 天已安排` : '还没安排',
     },
     {

@@ -8,6 +8,7 @@ import {
   todayStr,
   weekdayCN,
 } from '../storage'
+import PageHeader from './PageHeader'
 
 export default function MealPlan({
   plans,
@@ -185,12 +186,7 @@ export default function MealPlan({
 
   return (
     <main className="content">
-      <div className="section-head">
-        <div>
-          <h2>{sectionTitle}</h2>
-          <p className="section-sub">{sectionSub}</p>
-        </div>
-      </div>
+      <PageHeader title={sectionTitle} sub={sectionSub} />
 
       <div className="day-switch">
         <button
@@ -251,13 +247,19 @@ export default function MealPlan({
                 <span className="dish-menu-no" aria-hidden>
                   {i + 1}
                 </span>
-                <button
-                  type="button"
-                  className="dish-menu-name linked"
-                  onClick={() => onOpenDish({ date: targetDate, dishId: d.id })}
-                >
-                  {d.name}
-                </button>
+                {isAte ? (
+                  <span className="dish-menu-name">{d.name}</span>
+                ) : (
+                  <button
+                    type="button"
+                    className="dish-menu-name linked"
+                    onClick={() =>
+                      onOpenDish({ date: targetDate, dishId: d.id })
+                    }
+                  >
+                    {d.name}
+                  </button>
+                )}
                 <button
                   type="button"
                   className="dish-menu-dismiss"

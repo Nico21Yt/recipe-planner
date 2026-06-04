@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useUI } from '../ui-context'
+import BackBar from './BackBar'
 import RecipePhotos from './RecipePhotos'
 
 export default function RecipeDetail({
   recipe,
   onBack,
+  onEdit,
   onPhotosChange,
   onAiModify,
 }) {
@@ -29,14 +31,14 @@ export default function RecipeDetail({
 
   return (
     <main className="content detail">
-      <div className="detail-bar">
-        <button className="btn ghost" onClick={onBack}>
-          ← 返回
-        </button>
-      </div>
-
-      <div className="detail-head">
+      <BackBar onBack={onBack} />
+      <div className="detail-head detail-head-row">
         <h2>{recipe.name}</h2>
+        {onEdit && (
+          <button type="button" className="btn ghost small" onClick={onEdit}>
+            编辑
+          </button>
+        )}
       </div>
 
       {onAiModify && (

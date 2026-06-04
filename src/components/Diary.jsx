@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { dayOf, formatMD, relativeDay, todayStr, weekdayCN } from '../storage'
 import Lightbox from './Lightbox'
+import PageHeader from './PageHeader'
 
 export default function Diary({ plans, recipes, onOpenRecipe }) {
   const today = todayStr()
@@ -45,9 +46,7 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
   if (entries.length === 0) {
     return (
       <main className="content">
-        <div className="section-head">
-          <h2>做饭日记</h2>
-        </div>
+        <PageHeader title="做饭日记" />
         <div className="empty">
           <p>还没有记录。做过的菜会在这里按日期留存。</p>
           <p className="hint">
@@ -61,12 +60,10 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
 
   return (
     <main className="content">
-      <div className="section-head">
-        <div>
-          <h2>做饭日记</h2>
-          <p className="section-sub">按日期回顾做过的菜和拍下的照片。</p>
-        </div>
-      </div>
+      <PageHeader
+        title="做饭日记"
+        sub="按日期回顾做过的菜和拍下的照片。"
+      />
 
       <div className="timeline">
         {entries.map((entry) => {

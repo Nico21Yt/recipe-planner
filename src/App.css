@@ -104,10 +104,101 @@
 }
 .topbar-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
-
+.topbar-sync {
+  flex-shrink: 0;
+}
+.wechat-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 14px;
+  background: var(--terracotta-soft);
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.wechat-banner p {
+  margin: 0;
+  flex: 1;
+}
+.wechat-banner-dismiss {
+  flex-shrink: 0;
+  border: none;
+  background: var(--surface);
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.detail-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.detail-head-row h2 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+.ai-bar-toggle {
+  align-self: flex-start;
+  border: 1.5px solid var(--ink);
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.ai-bar-body {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ai-bar.open .ai-bar-body {
+  display: flex;
+}
+.ai-bar:not(.open) .ai-bar-body {
+  display: none;
+}
+.bottom-nav-inner {
+  position: relative;
+}
+.bottom-nav-save {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.bottom-nav-save.save-saving {
+  color: var(--muted);
+  background: var(--surface);
+}
+.bottom-nav-save.save-saved {
+  color: var(--green-deep);
+  background: var(--green-soft);
+}
+.bottom-nav-save.save-error {
+  color: #b42318;
+  background: #fee4e2;
+}
 /* ---------- Buttons ---------- */
 .btn {
   border: 1.5px solid var(--ink);
@@ -186,9 +277,9 @@
 /* ---------- AI generate bar ---------- */
 .ai-bar {
   display: flex;
+  flex-direction: column;
   gap: 10px;
   margin-bottom: 18px;
-  flex-wrap: wrap;
 }
 .ai-bar .dish-input {
   flex: 1;
@@ -1761,7 +1852,7 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 .diary-dish-tag {
   background: var(--green-soft);
@@ -1774,7 +1865,7 @@
   line-height: 1.35;
 }
 .diary-body > .hint {
-  margin: 0;
+  margin: 4px 0 0;
   font-size: 14px;
 }
 
