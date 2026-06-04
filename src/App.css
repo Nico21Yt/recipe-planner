@@ -1918,7 +1918,7 @@
     overflow: hidden;
     height: 100%;
     background-color: var(--paper);
-    background-image: var(--page-gradient);
+    background-image: none;
   }
 
   body::after {
@@ -1941,9 +1941,24 @@
     overflow: hidden;
     z-index: 1;
     box-sizing: border-box;
-    padding-top: var(--safe-top);
     background-color: var(--paper);
-    background-image: var(--page-gradient);
+    background-image: var(--page-gradient-mobile);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-position: left top;
+  }
+
+  /* 灵动岛 / 状态栏：纯色与 theme-color 一致，避免与顶栏之间出现色带 */
+  .app::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--safe-top);
+    background-color: var(--paper);
+    z-index: 0;
+    pointer-events: none;
   }
 
   .app::after {
@@ -1961,7 +1976,7 @@
 
   .topbar {
     flex-shrink: 0;
-    padding: 10px 14px;
+    padding: max(10px, var(--safe-top)) 14px 10px;
     gap: 8px;
     background: transparent;
     border-bottom: none;

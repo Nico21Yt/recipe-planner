@@ -41,6 +41,7 @@
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --app-height: 100%;
+  /* 桌面：左上略深绿；手机在 App.css 里覆盖，避免灵动岛一带偏冷发暗 */
   --page-gradient: radial-gradient(
       66% 54% at 8% -4%,
       rgba(42, 82, 50, 0.22) 0%,
@@ -54,6 +55,16 @@
     radial-gradient(
       48% 42% at 88% 100%,
       rgba(197, 86, 42, 0.08) 0%,
+      transparent 60%
+    );
+  --page-gradient-mobile: radial-gradient(
+      58% 48% at 100% 12%,
+      rgba(58, 107, 67, 0.1) 0%,
+      transparent 58%
+    ),
+    radial-gradient(
+      48% 42% at 88% 100%,
+      rgba(197, 86, 42, 0.07) 0%,
       transparent 60%
     );
 
