@@ -280,7 +280,7 @@ export default function MealPlan({
           )}
         </div>
 
-        {ateReady && dishes.length > 0 ? (
+        {dishes.length > 0 ? (
           <ol className="dish-menu">
             {dishes.map((d, i) => {
               const linkedRecipe = d.recipeId
@@ -345,7 +345,7 @@ export default function MealPlan({
           <p className="hint plan-empty-hint">{emptyHint}</p>
         )}
 
-        {ateReady && (
+        {(!isAte || ateReady) && (
           <>
         <div className="dish-add">
           <div className="combo" ref={comboRef}>
