@@ -38,6 +38,9 @@ export default function RecipeCard({
       <h3 className="card-title">{recipe.name || '未命名'}</h3>
       <div className="card-foot" onClick={(e) => e.stopPropagation()}>
         <StatusMenu value={recipe.status} onChange={onStatusChange} />
+        <span className="card-enter" aria-hidden>
+          查看 →
+        </span>
       </div>
     </article>
   )
