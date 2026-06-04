@@ -2393,8 +2393,8 @@
 
   .topbar {
     flex-shrink: 0;
-    padding-top: calc(6px + var(--safe-top));
-    padding-bottom: 6px;
+    padding-top: calc(10px + var(--safe-top));
+    padding-bottom: 10px;
     padding-left: calc(var(--mobile-page-pad) + var(--safe-left));
     padding-right: calc(var(--mobile-page-pad) + var(--safe-right));
     gap: 8px;
@@ -2432,7 +2432,7 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     scroll-behavior: auto;
-    padding-top: 12px;
+    padding-top: 16px;
     padding-bottom: var(--mobile-nav-clearance);
     padding-left: calc(var(--mobile-page-pad) + var(--safe-left));
     padding-right: calc(var(--mobile-page-pad) + var(--safe-right));
@@ -2542,13 +2542,13 @@
   }
   .home-grid {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 12px;
     width: 100%;
     max-width: 100%;
   }
 
   .content.home {
-    padding-bottom: calc(var(--mobile-nav-clearance) + 12px);
+    padding-bottom: var(--mobile-nav-clearance);
     padding-left: calc(var(--mobile-page-pad) + var(--safe-left));
     padding-right: calc(var(--mobile-page-pad) + var(--safe-right));
   }
@@ -2562,7 +2562,7 @@
   }
 
   .home-hero {
-    margin-bottom: 14px;
+    margin-bottom: 20px;
     width: 100%;
     max-width: 100%;
   }
@@ -2570,19 +2570,20 @@
   .home-kicker {
     font-size: 10px;
     letter-spacing: 0.2em;
-    margin-bottom: 8px;
-    padding: 3px 10px;
+    margin-bottom: 10px;
+    padding: 4px 12px;
     border-width: 1px;
   }
 
   .home-hero h2 {
     font-size: clamp(26px, 7.5vw, 34px);
-    margin-bottom: 4px;
-    line-height: 1.12;
+    margin-bottom: 8px;
+    line-height: 1.15;
   }
 
   .home-hero p {
     font-size: 14px;
+    margin-top: 2px;
   }
 
   .home-card {
@@ -2681,7 +2682,7 @@
 
   /* ---------- 各页统一移动端工具风 ---------- */
   .section-head {
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     align-items: flex-start;
   }
   .section-head h2 {
