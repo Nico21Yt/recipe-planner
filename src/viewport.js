@@ -1,47 +1,72 @@
-// 手机端：键盘浮在页面上方，不压缩整页高度（避免内容被顶上去）
-let layoutHeight = Math.round(window.innerHeight)
-
-function isKeyboardOpen() {
-  const vv = window.visualViewport
-  if (!vv) return false
-  return window.innerHeight - vv.height > 72
+// 手机端：键盘弹出时不压缩外壳、不让中间 .content 被顶上去
+function isMobile() {
+  return window.matchMedia('(max-width: 720px)').matches
 }
 
-function syncViewportHeight() {
-  if (!window.matchMedia('(max-width: 720px)').matches) return
+function pinWindowScroll() {
+  window.scrollTo(0, 0)
+  document.documentElement.scrollTop = 0
+  document.body.scrollTop = 0
+}
 
-  if (!isKeyboardOpen()) {
-    layoutHeight = Math.round(window.innerHeight)
+const lockTop = new WeakMap()
+const lockTimer = new WeakMap()
+
+function startContentScrollLock(scrollEl) {
+  const top = scrollEl.scrollTop
+  lockTop.set(scrollEl, top)
+  const fix = () => {
+    scrollEl.scrollTop = lockTop.get(scrollEl)
+    pinWindowScroll()
   }
-  document.documentElement.style.setProperty('--app-height', `${layoutHeight}px`)
+  fix()
+  if (lockTimer.has(scrollEl)) clearInterval(lockTimer.get(scrollEl))
+  lockTimer.set(scrollEl, setInterval(fix, 40))
 }
 
-function restoreAfterKeyboard() {
-  if (!window.matchMedia('(max-width: 720px)').matches) return
-  layoutHeight = Math.round(window.innerHeight)
-  document.documentElement.style.setProperty('--app-height', `${layoutHeight}px`)
+function stopContentScrollLock(scrollEl) {
+  const id = lockTimer.get(scrollEl)
+  if (id) clearInterval(id)
+  lockTimer.delete(scrollEl)
+  lockTop.delete(scrollEl)
 }
 
-syncViewportHeight()
-window.addEventListener('resize', syncViewportHeight)
-window.addEventListener('orientationchange', () => {
-  setTimeout(restoreAfterKeyboard, 80)
-  setTimeout(restoreAfterKeyboard, 320)
+function onFocusIn(e) {
+  if (!isMobile()) return
+  const t = e.target
+  if (!t?.matches?.('input, textarea, select')) return
+  pinWindowScroll()
+  const scrollEl = t.closest('.content')
+  if (scrollEl) startContentScrollLock(scrollEl)
+}
+
+function onFocusOut(e) {
+  if (!isMobile()) return
+  const t = e.target
+  if (!t?.matches?.('input, textarea, select')) return
+  const scrollEl = t.closest('.content')
+  setTimeout(() => {
+    if (scrollEl) stopContentScrollLock(scrollEl)
+    pinWindowScroll()
+  }, 120)
+  setTimeout(pinWindowScroll, 360)
+}
+
+pinWindowScroll()
+document.addEventListener('focusin', onFocusIn, true)
+document.addEventListener('focusout', onFocusOut, true)
+
+window.visualViewport?.addEventListener('scroll', () => {
+  if (!isMobile()) return
+  pinWindowScroll()
+  document.querySelectorAll('.content').forEach((el) => {
+    if (lockTimer.has(el) && lockTop.has(el)) {
+      el.scrollTop = lockTop.get(el)
+    }
+  })
 })
 
-document.addEventListener(
-  'focusout',
-  (e) => {
-    const t = e.target
-    if (
-      t &&
-      (t.tagName === 'INPUT' ||
-        t.tagName === 'TEXTAREA' ||
-        t.tagName === 'SELECT')
-    ) {
-      setTimeout(restoreAfterKeyboard, 80)
-      setTimeout(restoreAfterKeyboard, 320)
-    }
-  },
-  true,
-)
+window.addEventListener('orientationchange', () => {
+  setTimeout(pinWindowScroll, 100)
+  setTimeout(pinWindowScroll, 400)
+})
