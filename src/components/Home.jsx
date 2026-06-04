@@ -56,10 +56,19 @@ export default function Home({ recipes, plans, onPick, onRefresh }) {
             style={{ '--i': i }}
             onClick={() => onPick(o.id)}
           >
-            <span className="home-no">0{i + 1}</span>
-            <h3>{o.title}</h3>
-            <p className="home-desc">{o.desc}</p>
-            <span className="home-stat">{o.stat}</span>
+            <span className="home-no" aria-hidden>
+              0{i + 1}
+            </span>
+            <div className="home-card-body">
+              <h3>{o.title}</h3>
+              <p className="home-desc">{o.desc}</p>
+              <div className="home-card-foot">
+                <span className="home-stat">{o.stat}</span>
+                <span className="home-enter" aria-hidden>
+                  进入 →
+                </span>
+              </div>
+            </div>
           </button>
         ))}
       </div>

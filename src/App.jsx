@@ -487,29 +487,31 @@ export default function App() {
         </Suspense>
       )}
 
-      <nav className="bottom-nav" aria-label="主导航">
-        <div className="bottom-nav-inner">
-          {mobileSaveHint && (
-            <span className={'bottom-nav-save save-' + saveState}>
-              {mobileSaveHint}
-            </span>
-          )}
-          {[{ id: 'home', short: '首页' }, ...TABS].map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={'bn-item' + (tab === t.id ? ' active' : '')}
-              onClick={() => {
-                setTab(t.id)
-                if (t.id === 'recipes') setView('list')
-                setPlanDish(null)
-              }}
-            >
-              <span className="bn-label">{t.short}</span>
-            </button>
-          ))}
-        </div>
-      </nav>
+      <div className="bottom-nav-area">
+        <nav className="bottom-nav" aria-label="主导航">
+          <div className="bottom-nav-inner">
+            {mobileSaveHint && (
+              <span className={'bottom-nav-save save-' + saveState}>
+                {mobileSaveHint}
+              </span>
+            )}
+            {[{ id: 'home', short: '首页' }, ...TABS].map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={'bn-item' + (tab === t.id ? ' active' : '')}
+                onClick={() => {
+                  setTab(t.id)
+                  if (t.id === 'recipes') setView('list')
+                  setPlanDish(null)
+                }}
+              >
+                <span className="bn-label">{t.short}</span>
+              </button>
+            ))}
+          </div>
+        </nav>
+      </div>
 
       <footer className="foot">
         {BRAND} · 云端共享数据

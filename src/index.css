@@ -40,6 +40,7 @@
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --mobile-nav-clearance: calc(96px + var(--safe-bottom));
   /* 桌面：左上略深绿；手机在 App.css 里覆盖，避免灵动岛一带偏冷发暗 */
   --page-gradient: radial-gradient(
       66% 54% at 8% -4%,
