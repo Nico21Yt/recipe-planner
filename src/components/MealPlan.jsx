@@ -134,6 +134,13 @@ export default function MealPlan({
       return
     }
 
+    if (isAte) {
+      appendDish(plans, makeDish(name, null))
+      setInput('')
+      closeList()
+      return
+    }
+
     setBusy(true)
     closeList()
     try {
@@ -163,7 +170,7 @@ export default function MealPlan({
         : '吃过什么'
 
   const sectionSub = isAte
-    ? '补记某天吃过的菜，会出现在做饭日记。'
+    ? '只记菜名即可，外卖外食不用建菜谱，会出现在做饭日记。'
     : '挑好菜，备注留给做菜的人。'
 
   const dateRel = isAte
@@ -171,12 +178,6 @@ export default function MealPlan({
     : which === 'today'
       ? '今天'
       : '明天'
-
-  const chefNoteLabel = isAte
-    ? '这天的备注'
-    : which === 'today'
-      ? '今天的菜谱备注'
-      : '明天的菜谱备注'
 
   const emptyHint = isAte
     ? '还没记录，加几道吃过的菜吧。'
@@ -275,7 +276,9 @@ export default function MealPlan({
             <input
               ref={inputRef}
               className="dish-input"
-              placeholder="选菜谱或输入新菜名"
+              placeholder={
+                isAte ? '输入吃过的菜名，或从菜谱选' : '选菜谱或输入新菜名'
+              }
               value={input}
               disabled={busy}
               enterKeyHint="done"
@@ -328,31 +331,37 @@ export default function MealPlan({
           {hasInput && (
             <button
               type="button"
-              className={'btn small ' + (isNewDish ? 'accent' : 'primary')}
+              className={
+                'btn small ' + (isNewDish && !isAte ? 'accent' : 'primary')
+              }
               onClick={() => addDish()}
               disabled={busy || alreadySelected}
             >
-              {busy ? '…' : isNewDish ? '生成' : '添加'}
+              {busy ? '…' : isNewDish && !isAte ? '生成' : '添加'}
             </button>
           )}
         </div>
         {hasInput && alreadySelected && !busy && (
           <p className="hint">已在{isAte ? '记录' : '计划'}里。</p>
         )}
-        {hasInput && isNewDish && !busy && !alreadySelected && (
+        {hasInput && isNewDish && !isAte && !busy && !alreadySelected && (
           <p className="hint">新菜名将用 AI 生成菜谱并加入。</p>
         )}
 
-        <label className="chef-note">
-          <span className="chef-note-label">{chefNoteLabel}</span>
-          <textarea
-            className="chef-note-input"
-            rows={3}
-            placeholder="口味偏好、忌口、少油少盐、多准备一份…"
-            value={chefNote}
-            onChange={(e) => updatePlan({ chefNote: e.target.value })}
-          />
-        </label>
+        {!isAte && (
+          <label className="chef-note">
+            <span className="chef-note-label">
+              {which === 'today' ? '今天的菜谱备注' : '明天的菜谱备注'}
+            </span>
+            <textarea
+              className="chef-note-input"
+              rows={3}
+              placeholder="口味偏好、忌口、少油少盐、多准备一份…"
+              value={chefNote}
+              onChange={(e) => updatePlan({ chefNote: e.target.value })}
+            />
+          </label>
+        )}
       </section>
     </main>
   )
