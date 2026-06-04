@@ -1912,6 +1912,28 @@
 
 /* ---------- Responsive ---------- */
 @media (max-width: 720px) {
+  .app {
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  .topbar {
+    flex-shrink: 0;
+    padding: calc(10px + var(--safe-top)) 14px 10px;
+    gap: 8px;
+  }
+  .brand p {
+    display: none;
+  }
+  .logo {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    border-radius: 12px;
+  }
+
   .combo .dish-input,
   .combo-trigger {
     padding-right: 68px;
@@ -1925,9 +1947,14 @@
     grid-template-columns: 1fr;
   }
   .content {
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
     padding: 16px;
-    /* 底部导航高度 + 安全区，避免内容被挡 */
-    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: 28px;
   }
   .tabs {
     display: none;
@@ -1940,22 +1967,19 @@
   .bottom-nav {
     display: flex;
     flex-direction: column;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    flex-shrink: 0;
+    position: relative;
     z-index: 50;
     background: var(--surface);
     border-top: 1.5px solid var(--ink);
-    padding-bottom: constant(safe-area-inset-bottom);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-bottom: var(--safe-bottom);
     box-shadow: 0 -6px 24px rgba(30, 50, 25, 0.1);
   }
   .bottom-nav-inner {
     display: flex;
     align-items: stretch;
     gap: 6px;
-    padding: 10px;
+    padding: 8px 10px max(8px, var(--safe-bottom));
   }
   .bn-item {
     flex: 1;
@@ -2003,6 +2027,12 @@
     max-width: 360px;
   }
   .home {
-    min-height: calc(100vh - 200px);
+    min-height: 0;
+    justify-content: center;
+    padding: 24px 0;
+  }
+
+  .update-banner {
+    flex-shrink: 0;
   }
 }
