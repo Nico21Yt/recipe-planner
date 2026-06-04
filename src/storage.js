@@ -93,6 +93,7 @@ export function normalizeDish(dish) {
     ...dish,
     name: (dish.name || '').trim(),
     prep: normalizePrep(dish.prep),
+    photos: Array.isArray(dish.photos) ? dish.photos : [],
   }
 }
 
@@ -116,6 +117,7 @@ export function makeDish(name, recipeId = null) {
     name: name.trim(),
     recipeId,
     prep: normalizePrep(null),
+    photos: [],
   }
 }
 
@@ -165,4 +167,15 @@ export function formatMD(dateStr) {
   const d = new Date(dateStr + 'T00:00:00')
   if (isNaN(d)) return dateStr
   return `${d.getMonth() + 1}月${d.getDate()}日`
+}
+
+/** 某计划日、某道菜对应的照片（菜谱按日期筛，否则用 dish.photos） */
+export function photosForPlanDish(dish, planDate, recipes) {
+  if (!dish) return []
+  if (dish.recipeId) {
+    const recipe = recipes.find((r) => r.id === dish.recipeId)
+    if (!recipe) return []
+    return (recipe.photos || []).filter((p) => dayOf(p.date) === planDate)
+  }
+  return dish.photos || []
 }

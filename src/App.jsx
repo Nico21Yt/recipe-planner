@@ -24,7 +24,7 @@ const TABS = [
   { id: 'diary', label: '做饭日记', short: '日记' },
 ]
 
-const BRAND = '尼的小厨房'
+const BRAND = 'Nico的小厨房'
 
 function TabFallback() {
   return (
@@ -270,7 +270,7 @@ export default function App() {
             setPlanDish(null)
           }}
         >
-          <span className="logo">灶</span>
+          <span className="logo">N</span>
           <div>
             <div className="brand-title-row">
               <h1>{BRAND}</h1>
@@ -382,6 +382,9 @@ export default function App() {
             onChange={setPlans}
             onOpenDish={openPlanDish}
             onGenerateRecipe={handleGenerate}
+            onRecipePhotosChange={(id, photosOrFn) =>
+              updateRecipePhotos(id, photosOrFn)
+            }
           />
         </Suspense>
       )}
