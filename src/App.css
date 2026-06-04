@@ -1352,65 +1352,16 @@
   margin: 0 0 12px;
 }
 
-.dish-add-split {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.dish-pick {
-  position: relative;
-}
-.dish-pick-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  cursor: pointer;
-  color: var(--ink);
-  background: var(--bg);
-  border: 1.5px solid var(--line);
-  border-radius: var(--radius-sm, 10px);
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 600;
-  -webkit-tap-highlight-color: transparent;
-}
-.dish-pick-btn.open {
-  border-color: var(--green);
-}
-.dish-pick-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.pick-chevron {
-  width: 8px;
-  height: 8px;
-  border-right: 2px solid var(--ink-2);
-  border-bottom: 2px solid var(--ink-2);
-  transform: rotate(45deg) translateY(-2px);
-  transition: transform 0.18s ease;
-  flex-shrink: 0;
-}
-.pick-chevron.open {
-  transform: rotate(-135deg) translateY(2px);
-}
-.dish-pick-menu {
-  top: calc(100% + 6px);
-}
-.dish-add-or {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
-  text-align: center;
-}
-.dish-new-row {
+.dish-add {
   display: flex;
   gap: 8px;
+  align-items: stretch;
 }
-.dish-new-row .dish-input {
+.dish-add .combo {
   flex: 1;
   min-width: 0;
+}
+.dish-add .dish-input {
   background: var(--bg);
 }
 

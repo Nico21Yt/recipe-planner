@@ -20,7 +20,7 @@ export default function MealPlan({
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
   const [listOpen, setListOpen] = useState(false)
-  const pickRef = useRef(null)
+  const comboRef = useRef(null)
   const inputRef = useRef(null)
 
   const targetDate = which === 'today' ? today : addDays(today, 1)
@@ -30,8 +30,9 @@ export default function MealPlan({
   }
 
   function toggleList() {
-    setListOpen((v) => !v)
-    inputRef.current?.blur()
+    const next = !listOpen
+    setListOpen(next)
+    if (next) inputRef.current?.blur()
   }
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export default function MealPlan({
 
   useEffect(() => {
     function onDocClick(e) {
-      if (pickRef.current && !pickRef.current.contains(e.target)) {
+      if (comboRef.current && !comboRef.current.contains(e.target)) {
         closeList()
       }
     }
@@ -100,8 +101,13 @@ export default function MealPlan({
   const match = recipes.find((r) => r.name === input.trim())
   const isNewDish = input.trim() && !match
   const alreadySelected = input.trim() && isAlreadySelected(input.trim())
+  const hasInput = !!input.trim()
 
   const available = recipes.filter((r) => !isAlreadySelected(r))
+  const query = input.trim().toLowerCase()
+  const listOptions = query
+    ? available.filter((r) => r.name.toLowerCase().includes(query))
+    : available
 
   async function addDish(nameArg) {
     const name = (nameArg ?? input).trim()
@@ -196,24 +202,38 @@ export default function MealPlan({
           <p className="hint plan-empty-hint">还没安排，加几道想做的菜吧。</p>
         )}
 
-        <div className="dish-add-split">
-          <div className="dish-pick" ref={pickRef}>
+        <div className="dish-add">
+          <div className="combo" ref={comboRef}>
+            <input
+              ref={inputRef}
+              className="dish-input"
+              placeholder="选菜谱或输入新菜名"
+              value={input}
+              disabled={busy}
+              enterKeyHint="done"
+              onChange={(e) => {
+                setInput(e.target.value)
+                closeList()
+              }}
+              onFocus={closeList}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && hasInput) {
+                  e.preventDefault()
+                  addDish()
+                }
+              }}
+            />
             <button
               type="button"
-              className={
-                'dish-pick-btn dish-input' + (listOpen ? ' open' : '')
-              }
+              className={'combo-arrow' + (listOpen ? ' open' : '')}
               disabled={busy}
-              aria-expanded={listOpen}
+              aria-label={listOpen ? '收起菜谱' : '展开菜谱'}
               onClick={toggleList}
-            >
-              <span>从菜谱选</span>
-              <span className={'pick-chevron' + (listOpen ? ' open' : '')} />
-            </button>
+            />
             {listOpen && (
-              <ul className="combo-menu dish-pick-menu" role="listbox">
-                {available.length > 0 ? (
-                  available.map((r) => (
+              <ul className="combo-menu" role="listbox">
+                {listOptions.length > 0 ? (
+                  listOptions.map((r) => (
                     <li key={r.id}>
                       <button
                         type="button"
@@ -228,51 +248,31 @@ export default function MealPlan({
                 ) : (
                   <li className="combo-empty">
                     {recipes.length === 0
-                      ? '菜谱为空，先去添加菜谱吧'
-                      : '可选的菜都已在计划里'}
+                      ? '菜谱为空'
+                      : query
+                        ? '没有匹配的菜'
+                        : '可选的菜都已在计划里'}
                   </li>
                 )}
               </ul>
             )}
           </div>
-
-          <p className="dish-add-or">或输入新菜名</p>
-
-          <div className="dish-new-row">
-            <input
-              ref={inputRef}
-              className="dish-input"
-              placeholder="例如 糖醋排骨"
-              value={input}
-              disabled={busy}
-              enterKeyHint="done"
-              onFocus={closeList}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  addDish()
-                }
-              }}
-            />
+          {hasInput && (
             <button
               type="button"
               className={'btn small ' + (isNewDish ? 'accent' : 'primary')}
               onClick={() => addDish()}
-              disabled={busy || !input.trim() || alreadySelected}
+              disabled={busy || alreadySelected}
             >
-              {busy ? 'AI 生成中…' : isNewDish ? '生成并添加' : '添加'}
+              {busy ? '…' : isNewDish ? '生成' : '添加'}
             </button>
-          </div>
+          )}
         </div>
-
-        {alreadySelected && !busy && (
-          <p className="hint">这道菜已经在计划里了。</p>
+        {hasInput && alreadySelected && !busy && (
+          <p className="hint">已在计划里。</p>
         )}
-        {isNewDish && !busy && !alreadySelected && input.trim() && (
-          <p className="hint">
-            「{input.trim()}」还不在菜谱里，点「生成并添加」会用 AI 生成菜谱。
-          </p>
+        {hasInput && isNewDish && !busy && !alreadySelected && (
+          <p className="hint">新菜名将用 AI 生成菜谱并加入。</p>
         )}
 
         <label className="chef-note">
