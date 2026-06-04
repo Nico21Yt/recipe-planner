@@ -11,7 +11,13 @@ export function useKitchenData() {
   const [hasUpdate, setHasUpdate] = useState(false)
   const loadedRef = useRef(false)
   const saveTimer = useRef(null)
+  const saveIdleTimer = useRef(null)
   const knownUpdatedAt = useRef(0)
+
+  function scheduleSaveIdle(ms = 1800) {
+    if (saveIdleTimer.current) clearTimeout(saveIdleTimer.current)
+    saveIdleTimer.current = setTimeout(() => setSaveState('idle'), ms)
+  }
 
   const applyRemote = useCallback(({ recipes, plans, updatedAt }) => {
     setRecipes(recipes.map(cleanRecipe))
@@ -44,16 +50,24 @@ export function useKitchenData() {
   useEffect(() => {
     if (!loadedRef.current) return
     if (saveTimer.current) clearTimeout(saveTimer.current)
+    if (saveIdleTimer.current) clearTimeout(saveIdleTimer.current)
     setSaveState('saving')
     saveTimer.current = setTimeout(() => {
       saveData({ recipes, plans })
         .then((updatedAt) => {
           setSaveState('saved')
           knownUpdatedAt.current = updatedAt
+          scheduleSaveIdle(1800)
         })
-        .catch(() => setSaveState('error'))
+        .catch(() => {
+          setSaveState('error')
+          scheduleSaveIdle(4000)
+        })
     }, 600)
-    return () => saveTimer.current && clearTimeout(saveTimer.current)
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current)
+      if (saveIdleTimer.current) clearTimeout(saveIdleTimer.current)
+    }
   }, [recipes, plans])
 
   useEffect(() => {

@@ -247,14 +247,12 @@ export default function App() {
     )
   }
 
-  const saveHint =
+  const mobileSaveHint =
     saveState === 'saving'
       ? '保存中'
-      : saveState === 'saved'
-        ? '已保存'
-        : saveState === 'error'
-          ? '保存失败'
-          : ''
+      : saveState === 'error'
+        ? '保存失败'
+        : ''
 
   return (
     <div className="app">
@@ -491,9 +489,9 @@ export default function App() {
 
       <nav className="bottom-nav" aria-label="主导航">
         <div className="bottom-nav-inner">
-          {saveHint && (
+          {mobileSaveHint && (
             <span className={'bottom-nav-save save-' + saveState}>
-              {saveHint}
+              {mobileSaveHint}
             </span>
           )}
           {[{ id: 'home', short: '首页' }, ...TABS].map((t) => (
