@@ -1376,7 +1376,7 @@
 .combo-trigger {
   flex: 1;
   width: 100%;
-  padding-right: 40px;
+  padding-right: 56px;
   font-family: var(--font-display);
   font-size: 16px;
   font-weight: 600;
@@ -1443,31 +1443,38 @@
 }
 .combo-arrow {
   position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 30px;
-  height: 30px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 52px;
+  min-height: 44px;
   border: none;
-  background: transparent;
-  border-radius: 8px;
-  transition: transform 0.18s ease;
+  border-left: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: 0 9px 9px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease;
 }
 .combo-arrow::after {
   content: '';
   display: block;
   width: 8px;
   height: 8px;
-  margin: 0 auto;
   border-right: 2px solid var(--ink-2);
   border-bottom: 2px solid var(--ink-2);
   transform: rotate(45deg) translateY(-2px);
+  transition: transform 0.18s ease;
 }
-.combo-arrow.open {
-  transform: translateY(-50%) rotate(180deg);
+.combo-arrow.open::after {
+  transform: rotate(-135deg) translateY(2px);
 }
-.combo-arrow:hover {
-  background: var(--border);
+.combo-arrow:hover,
+.combo-arrow:active {
+  background: var(--green-soft);
 }
 .combo-menu {
   position: absolute;
@@ -1809,6 +1816,15 @@
 
 /* ---------- Responsive ---------- */
 @media (max-width: 720px) {
+  .combo .dish-input,
+  .combo-trigger {
+    padding-right: 68px;
+  }
+  .combo-arrow {
+    width: 60px;
+    min-width: 60px;
+  }
+
   .detail-grid {
     grid-template-columns: 1fr;
   }
