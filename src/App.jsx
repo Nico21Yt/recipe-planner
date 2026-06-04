@@ -13,9 +13,10 @@ import MealPlan from './components/MealPlan'
 import PlanDishDetail from './components/PlanDishDetail'
 import Diary from './components/Diary'
 import Home from './components/Home'
-import { generateRecipe } from './ai'
+import { generateRecipe, modifyRecipe } from './ai'
 import { fetchData, saveData, CLIENT_ID } from './cloud'
 import { useUI } from './ui-context'
+import { APP_VERSION } from './version'
 import './App.css'
 
 const TABS = [
@@ -175,6 +176,14 @@ export default function App() {
             }
           : p,
       ),
+    )
+  }
+
+  async function handleAiModify(instruction) {
+    if (!active) return
+    const updated = await modifyRecipe(active, instruction)
+    setRecipes((prev) =>
+      prev.map((r) => (r.id === active.id ? updated : r)),
     )
   }
 
@@ -456,6 +465,7 @@ export default function App() {
           recipe={active}
           onBack={() => setView('list')}
           onPhotosChange={(photos) => updateRecipePhotos(active.id, photos)}
+          onAiModify={handleAiModify}
         />
       )}
 
@@ -468,6 +478,9 @@ export default function App() {
       )}
 
       <nav className="bottom-nav" aria-label="主导航">
+        <p className="app-version app-version-nav" title="应用版本">
+          v{APP_VERSION}
+        </p>
         <div className="bottom-nav-inner">
           {[{ id: 'home', short: '首页' }, ...TABS].map((t) => (
             <button
@@ -487,6 +500,10 @@ export default function App() {
 
       <footer className="foot">
         Nico的小厨房 · 云端共享数据
+        <span className="app-version app-version-foot" title="应用版本">
+          {' '}
+          · v{APP_VERSION}
+        </span>
         {saveState === 'saving' && <span className="sync"> · 保存中…</span>}
         {saveState === 'saved' && <span className="sync ok"> · 已同步</span>}
         {saveState === 'error' && (

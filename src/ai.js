@@ -3,6 +3,8 @@ import { CATEGORIES, cleanTags } from './storage'
 // 后端代理地址：部署到 Vercel 时用相对路径 /api/generate-recipe 即可。
 // 如果前端和后端分开部署，可在 .env 里设 VITE_AI_API 指向后端完整地址。
 const API_URL = import.meta.env.VITE_AI_API || '/api/generate-recipe'
+const MODIFY_API_URL =
+  import.meta.env.VITE_AI_MODIFY_API || '/api/modify-recipe'
 
 function uid() {
   return 'r_' + Math.random().toString(36).slice(2, 9)
@@ -47,12 +49,17 @@ export function normalizeRecipe(raw, fallbackName) {
 }
 
 export async function generateRecipe(dish) {
+  const raw = await postAiJson(API_URL, { dish })
+  return normalizeRecipe(raw, dish)
+}
+
+async function postAiJson(url, body) {
   let resp
   try {
-    resp = await fetch(API_URL, {
+    resp = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dish }),
+      body: JSON.stringify(body),
     })
   } catch {
     throw new Error('连不上 AI 服务，请检查网络或稍后再试')
@@ -62,14 +69,39 @@ export async function generateRecipe(dish) {
   try {
     data = await resp.json()
   } catch {
-    // 非 JSON 响应（例如本地 vite 没有后端时返回的 HTML）
+    // 非 JSON（例如本地 vite 无后端时返回 HTML）
   }
 
   if (!resp.ok) {
-    throw new Error(data.error || `生成失败（${resp.status}）`)
+    throw new Error(data.error || `请求失败（${resp.status}）`)
   }
   if (!data.recipe) {
     throw new Error('AI 没有返回菜谱，请重试')
   }
-  return normalizeRecipe(data.recipe, dish)
+  return data.recipe
+}
+
+/** 按用户说明修改现有菜谱，保留 id / 照片 / 收藏等字段 */
+export async function modifyRecipe(existing, instruction) {
+  const raw = await postAiJson(MODIFY_API_URL, {
+    instruction: instruction.trim(),
+    recipe: {
+      name: existing.name,
+      category: existing.category,
+      tags: existing.tags,
+      ingredients: existing.ingredients,
+      steps: existing.steps,
+      notes: existing.notes,
+    },
+  })
+  const patch = normalizeRecipe(raw, existing.name)
+  return {
+    ...existing,
+    name: patch.name,
+    category: patch.category,
+    tags: patch.tags,
+    ingredients: patch.ingredients,
+    steps: patch.steps,
+    notes: patch.notes,
+  }
 }

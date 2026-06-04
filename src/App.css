@@ -481,6 +481,45 @@
   font-weight: 600;
   letter-spacing: -0.02em;
 }
+.ai-modify-panel {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  background: var(--bg);
+  border-style: dashed;
+}
+.ai-modify-title {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+.ai-modify-hint {
+  margin: 0 0 10px;
+}
+.ai-modify-input {
+  width: 100%;
+  resize: vertical;
+  min-height: 52px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.45;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  box-sizing: border-box;
+}
+.ai-modify-input:focus {
+  outline: none;
+  border-color: var(--green);
+}
+.ai-modify-btn {
+  width: 100%;
+}
+@media (min-width: 520px) {
+  .ai-modify-btn {
+    width: auto;
+  }
+}
 .status-row {
   display: flex;
   gap: 8px;
@@ -852,6 +891,21 @@
   padding: 2px 6px;
   border-radius: 5px;
   border: 1px solid var(--border);
+}
+.app-version {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  opacity: 0.55;
+  letter-spacing: 0.02em;
+  user-select: all;
+}
+.app-version-nav {
+  display: none;
+  margin: 0;
+  padding: 2px 0 0;
+  text-align: center;
+  line-height: 1;
 }
 
 /* ---------- Home / landing ---------- */
@@ -1765,6 +1819,10 @@
 
   .foot {
     display: none;
+  }
+
+  .app-version-nav {
+    display: block;
   }
 
   .bottom-nav {

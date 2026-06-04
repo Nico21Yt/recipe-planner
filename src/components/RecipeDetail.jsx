@@ -1,12 +1,17 @@
 import { useState } from 'react'
+import { useUI } from '../ui-context'
 import RecipePhotos from './RecipePhotos'
 
 export default function RecipeDetail({
   recipe,
   onBack,
   onPhotosChange,
+  onAiModify,
 }) {
+  const { toast } = useUI()
   const [checked, setChecked] = useState(() => new Set())
+  const [aiPrompt, setAiPrompt] = useState('')
+  const [aiBusy, setAiBusy] = useState(false)
 
   function toggle(idx) {
     setChecked((prev) => {
@@ -14,6 +19,21 @@ export default function RecipeDetail({
       next.has(idx) ? next.delete(idx) : next.add(idx)
       return next
     })
+  }
+
+  async function runAiModify() {
+    const text = aiPrompt.trim()
+    if (!text || aiBusy || !onAiModify) return
+    setAiBusy(true)
+    try {
+      await onAiModify(text)
+      setAiPrompt('')
+      toast('菜谱已按你的描述更新', 'success')
+    } catch (e) {
+      toast('AI 修改失败：' + e.message, 'error', 4000)
+    } finally {
+      setAiBusy(false)
+    }
   }
 
   return (
@@ -27,6 +47,37 @@ export default function RecipeDetail({
       <div className="detail-head">
         <h2>{recipe.name}</h2>
       </div>
+
+      {onAiModify && (
+        <section className="panel ai-modify-panel">
+          <h3 className="ai-modify-title">AI 改菜谱</h3>
+          <p className="hint ai-modify-hint">
+            说出想怎么改，例如「改成两人份」「去掉香菜」「步骤写简单一点」。
+          </p>
+          <textarea
+            className="ai-modify-input"
+            rows={2}
+            placeholder="输入修改要求…"
+            value={aiPrompt}
+            disabled={aiBusy}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault()
+                runAiModify()
+              }
+            }}
+          />
+          <button
+            type="button"
+            className="btn accent small ai-modify-btn"
+            disabled={aiBusy || !aiPrompt.trim()}
+            onClick={runAiModify}
+          >
+            {aiBusy ? 'AI 修改中…' : '按描述修改'}
+          </button>
+        </section>
+      )}
 
       <div className="detail-grid">
         <section className="panel">
