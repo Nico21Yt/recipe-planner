@@ -2093,6 +2093,38 @@
   color: var(--muted);
 }
 
+/* ---------- Desktop: 顶栏 / 内容 / 页脚同宽居中 ---------- */
+@media (min-width: 721px) {
+  .app {
+    align-items: center;
+  }
+
+  .topbar,
+  .content,
+  .wechat-banner,
+  .update-banner,
+  .foot {
+    width: 100%;
+    max-width: 1080px;
+    box-sizing: border-box;
+  }
+
+  .topbar {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .plan-card.single,
+  .day-switch {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .day-switch {
+    max-width: 560px;
+  }
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 720px) {
   html {
