@@ -59,9 +59,6 @@ export default function App() {
   const [genInput, setGenInput] = useState('')
   const [genBusy, setGenBusy] = useState(false)
   const [syncing, setSyncing] = useState(false)
-  const [aiBarOpen, setAiBarOpen] = useState(
-    () => !window.matchMedia('(max-width: 720px)').matches,
-  )
   const lastRefreshToastAt = useRef(0)
   const REFRESH_TOAST_GAP_MS = 8000
 
@@ -283,18 +280,18 @@ export default function App() {
         </div>
 
         <div className="topbar-actions">
-          {!loading && !loadError && tab !== 'home' && (
-            <button
-              type="button"
-              className="btn ghost small topbar-sync"
-              disabled={syncing}
-              onClick={() => refreshFromCloud().catch(() => {})}
-            >
-              {syncing ? '同步中…' : '同步'}
-            </button>
-          )}
           {tab !== 'home' && (
             <nav className="tabs">
+              {!loading && !loadError && (
+                <button
+                  type="button"
+                  className={'tab tab-sync' + (syncing ? ' syncing' : '')}
+                  disabled={syncing}
+                  onClick={() => refreshFromCloud().catch(() => {})}
+                >
+                  {syncing ? '同步中…' : '同步'}
+                </button>
+              )}
               {TABS.map((t) => (
                 <button
                   key={t.id}
@@ -406,40 +403,28 @@ export default function App() {
             sub="输入菜名，AI 帮你生成新手菜谱。"
           />
 
-          <div className={'ai-bar' + (aiBarOpen ? ' open' : '')}>
+          <div className="ai-bar">
+            <input
+              className="dish-input"
+              placeholder="想做什么菜？如 麻婆豆腐…"
+              value={genInput}
+              disabled={genBusy}
+              onChange={(e) => setGenInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  generateAndOpen()
+                }
+              }}
+            />
             <button
               type="button"
-              className="ai-bar-toggle"
-              aria-expanded={aiBarOpen}
-              onClick={() => setAiBarOpen((o) => !o)}
+              className="btn accent"
+              onClick={generateAndOpen}
+              disabled={genBusy || !genInput.trim()}
             >
-              {aiBarOpen ? '收起 AI 生成' : 'AI 生成菜谱'}
+              {genBusy ? 'AI 生成中…' : 'AI 生成菜谱'}
             </button>
-            {aiBarOpen && (
-              <div className="ai-bar-body">
-                <input
-                  className="dish-input"
-                  placeholder="想做什么菜？如 麻婆豆腐…"
-                  value={genInput}
-                  disabled={genBusy}
-                  onChange={(e) => setGenInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      generateAndOpen()
-                    }
-                  }}
-                />
-                <button
-                  type="button"
-                  className="btn accent"
-                  onClick={generateAndOpen}
-                  disabled={genBusy || !genInput.trim()}
-                >
-                  {genBusy ? '生成中…' : '生成'}
-                </button>
-              </div>
-            )}
           </div>
 
           <div className="toolbar">
@@ -473,7 +458,7 @@ export default function App() {
 
           {filtered.length === 0 && !genBusy ? (
             <div className="empty">
-              <p>还没有菜谱，展开上方 AI 生成第一道吧。</p>
+              <p>还没有菜谱，在上方输入菜名让 AI 生成第一道吧。</p>
             </div>
           ) : (
             <div className="grid">

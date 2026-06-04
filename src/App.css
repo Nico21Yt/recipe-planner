@@ -108,8 +108,19 @@
   gap: 8px;
   flex-wrap: wrap;
 }
-.topbar-sync {
+.tab-sync {
   flex-shrink: 0;
+  cursor: pointer;
+}
+.tab-sync:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.tab-sync.syncing {
+  color: var(--muted);
+}
+.tab-sync.active::after {
+  transform: scaleX(0);
 }
 .wechat-banner {
   display: flex;
@@ -149,28 +160,6 @@
   margin: 0;
   flex: 1;
   min-width: 0;
-}
-.ai-bar-toggle {
-  align-self: flex-start;
-  border: 1.5px solid var(--ink);
-  background: var(--surface);
-  border-radius: 10px;
-  padding: 8px 14px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 2px 2px 0 var(--ink);
-}
-.ai-bar-body {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.ai-bar.open .ai-bar-body {
-  display: flex;
-}
-.ai-bar:not(.open) .ai-bar-body {
-  display: none;
 }
 .bottom-nav-inner {
   position: relative;
@@ -277,7 +266,8 @@
 /* ---------- AI generate bar ---------- */
 .ai-bar {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 18px;
 }
