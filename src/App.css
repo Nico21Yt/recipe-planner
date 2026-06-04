@@ -1917,38 +1917,55 @@
   body {
     overflow: hidden;
     height: 100%;
+    background-color: var(--paper);
+    background-image: var(--page-gradient);
+  }
+
+  body::after {
+    display: none;
   }
 
   #root {
-    height: 100%;
+    height: var(--app-height, 100%);
+    min-height: var(--app-height, 100%);
   }
 
-  /* 对齐浏览器「可见区域」，避免与地址栏/工具栏叠成双下巴 */
   .app {
     position: fixed;
-    top: var(--app-offset-top, 0px);
-    left: 0;
-    right: 0;
+    inset: 0;
     width: 100%;
-    height: var(--app-height, 100svh);
-    max-height: var(--app-height, 100svh);
+    height: var(--app-height, 100%);
+    max-height: var(--app-height, 100%);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     z-index: 1;
+    box-sizing: border-box;
+    padding-top: var(--safe-top);
     background-color: var(--paper);
     background-image: var(--page-gradient);
-    background-attachment: scroll;
+  }
+
+  .app::after {
+    position: absolute;
+    z-index: 0;
+  }
+
+  .topbar,
+  .content,
+  .bottom-nav,
+  .update-banner {
+    position: relative;
+    z-index: 1;
   }
 
   .topbar {
     flex-shrink: 0;
-    padding: calc(8px + var(--safe-top)) 14px 8px;
+    padding: 10px 14px;
     gap: 8px;
-    /* 与 .app 共用纸纹底，避免毛玻璃/semi 透明造成色差 */
-    background: var(--paper);
-    background-image: var(--page-gradient);
-    background-attachment: scroll;
+    background: transparent;
+    border-bottom: none;
+    box-shadow: none;
   }
   .brand p {
     display: none;
@@ -1994,20 +2011,21 @@
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    position: relative;
-    z-index: 50;
-    background: var(--paper);
-    background-image: var(--page-gradient);
-    background-attachment: scroll;
-    border-top: 1.5px solid var(--ink);
-    padding-bottom: var(--safe-bottom);
+    background: transparent;
+    border-top: none;
     box-shadow: none;
+    padding-bottom: var(--safe-bottom);
   }
   .bottom-nav-inner {
     display: flex;
     align-items: stretch;
     gap: 6px;
-    padding: 8px 10px;
+    margin: 0 8px 8px;
+    padding: 6px;
+    background: var(--surface);
+    border: 1.5px solid var(--ink);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
   }
   .bn-item {
     flex: 1;
@@ -2056,20 +2074,15 @@
   }
   .home {
     min-height: 0;
-    justify-content: center;
-    padding: 24px 0;
+    justify-content: flex-start;
+    padding: 8px 0 16px;
+  }
+
+  .home-hero {
+    margin-bottom: 24px;
   }
 
   .update-banner {
     flex-shrink: 0;
-  }
-}
-
-/* 添加到主屏幕：无浏览器地址栏，仍用 visualViewport（通常为全屏） */
-@media (max-width: 720px) and (display-mode: standalone) {
-  .app {
-    top: 0;
-    height: var(--app-height, 100dvh);
-    max-height: var(--app-height, 100dvh);
   }
 }
