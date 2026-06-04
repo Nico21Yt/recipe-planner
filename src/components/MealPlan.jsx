@@ -38,9 +38,16 @@ export default function MealPlan({
     inputRef.current?.blur()
   }
 
+  function backToBrowse() {
+    setTypingMode(false)
+    setInput('')
+    openBrowse()
+  }
+
   function startTyping() {
-    setOpen(true)
     setTypingMode(true)
+    setOpen(false)
+    setInput('')
     requestAnimationFrame(() => inputRef.current?.focus())
   }
 
@@ -114,10 +121,11 @@ export default function MealPlan({
 
   const available = recipes.filter((r) => !isAlreadySelected(r))
   const query = input.trim().toLowerCase()
-  const options =
-    typingMode && query
-      ? available.filter((r) => r.name.toLowerCase().includes(query))
-      : available
+  const typeaheadOptions = query
+    ? available.filter((r) => r.name.toLowerCase().includes(query))
+    : []
+  const showTypeahead =
+    typingMode && open && query && (typeaheadOptions.length > 0 || isNewDish)
 
   async function addDish(nameArg) {
     const name = (nameArg ?? input).trim()
@@ -212,68 +220,53 @@ export default function MealPlan({
           <p className="hint plan-empty-hint">还没安排，加几道想做的菜吧。</p>
         )}
 
-        <div className="dish-add">
-          <div className="combo" ref={comboRef}>
-            {typingMode ? (
-              <input
-                ref={inputRef}
-                className="dish-input"
-                placeholder="输入菜名搜索或添加新菜…"
-                value={input}
-                disabled={busy}
-                enterKeyHint="done"
-                onChange={(e) => {
-                  setInput(e.target.value)
-                  setOpen(true)
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    addDish()
-                  } else if (e.key === 'Escape') {
-                    closePicker()
-                  }
-                }}
-              />
-            ) : (
+        <div className={'dish-add' + (typingMode ? ' dish-add-typing' : '')}>
+          {typingMode ? (
+            <div className="combo combo-typing" ref={comboRef}>
               <button
                 type="button"
-                className="combo-trigger dish-input"
+                className="combo-mode-link"
                 disabled={busy}
-                aria-expanded={open}
-                aria-haspopup="listbox"
-                onClick={() => (open ? closePicker() : openBrowse())}
+                onClick={backToBrowse}
               >
-                <span className="combo-trigger-label">从菜谱选一道菜…</span>
+                ← 从菜谱选
               </button>
-            )}
-            <button
-              type="button"
-              className={'combo-arrow' + (open ? ' open' : '')}
-              disabled={busy}
-              aria-label={open ? '收起菜谱列表' : '展开菜谱列表'}
-              onClick={() => (open ? closePicker() : openBrowse())}
-            />
-
-            {open && (
-              <ul className="combo-menu" role="listbox">
-                {typingMode && (
-                  <li className="combo-menu-bar">
-                    <button
-                      type="button"
-                      className="combo-back"
-                      onClick={() => {
-                        setTypingMode(false)
-                        setInput('')
-                        inputRef.current?.blur()
-                      }}
-                    >
-                      ← 返回菜谱列表
-                    </button>
-                  </li>
-                )}
-                {options.length > 0 ? (
-                  options.map((r) => (
+              <div className="combo-typing-row">
+                <input
+                  ref={inputRef}
+                  className="dish-input"
+                  placeholder="输入新菜名…"
+                  value={input}
+                  disabled={busy}
+                  enterKeyHint="done"
+                  onChange={(e) => {
+                    const v = e.target.value
+                    setInput(v)
+                    setOpen(!!v.trim())
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      addDish()
+                    } else if (e.key === 'Escape') {
+                      backToBrowse()
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className={
+                    'btn small ' + (isNewDish ? 'accent' : 'primary')
+                  }
+                  onClick={() => addDish()}
+                  disabled={busy || !input.trim() || alreadySelected}
+                >
+                  {busy ? 'AI 生成中…' : isNewDish ? '生成并添加' : '添加'}
+                </button>
+              </div>
+              {showTypeahead && (
+                <ul className="combo-menu combo-menu-typeahead" role="listbox">
+                  {typeaheadOptions.map((r) => (
                     <li key={r.id}>
                       <button
                         type="button"
@@ -284,28 +277,63 @@ export default function MealPlan({
                         {r.name}
                       </button>
                     </li>
-                  ))
-                ) : (
-                  <li className="combo-empty">
-                    {typingMode && query
-                      ? '没有匹配的菜谱'
-                      : available.length === 0
-                        ? '可选的菜都已在计划里'
-                        : '菜谱为空，先去添加菜谱吧'}
-                  </li>
-                )}
-                {typingMode && isNewDish && (
-                  <li>
-                    <button
-                      type="button"
-                      className="combo-item new"
-                      onClick={() => addDish()}
-                    >
-                      用 AI 生成「{input.trim()}」
-                    </button>
-                  </li>
-                )}
-                {!typingMode && (
+                  ))}
+                  {isNewDish && (
+                    <li>
+                      <button
+                        type="button"
+                        className="combo-item new"
+                        onClick={() => addDish()}
+                      >
+                        用 AI 生成「{input.trim()}」
+                      </button>
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
+          ) : (
+            <div className="combo" ref={comboRef}>
+              <button
+                type="button"
+                className="combo-trigger dish-input"
+                disabled={busy}
+                aria-expanded={open}
+                aria-haspopup="listbox"
+                onClick={() => (open ? closePicker() : openBrowse())}
+              >
+                <span className="combo-trigger-label">从菜谱选一道菜…</span>
+              </button>
+              <button
+                type="button"
+                className={'combo-arrow' + (open ? ' open' : '')}
+                disabled={busy}
+                aria-label={open ? '收起菜谱列表' : '展开菜谱列表'}
+                onClick={() => (open ? closePicker() : openBrowse())}
+              />
+
+              {open && (
+                <ul className="combo-menu" role="listbox">
+                  {available.length > 0 ? (
+                    available.map((r) => (
+                      <li key={r.id}>
+                        <button
+                          type="button"
+                          className="combo-item"
+                          role="option"
+                          onClick={() => addDish(r.name)}
+                        >
+                          {r.name}
+                        </button>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="combo-empty">
+                      {recipes.length === 0
+                        ? '菜谱为空，先去添加菜谱吧'
+                        : '可选的菜都已在计划里'}
+                    </li>
+                  )}
                   <li className="combo-menu-footer">
                     <button
                       type="button"
@@ -315,18 +343,9 @@ export default function MealPlan({
                       没找到？输入新菜名…
                     </button>
                   </li>
-                )}
-              </ul>
-            )}
-          </div>
-          {typingMode && (
-            <button
-              className={'btn small ' + (isNewDish ? 'accent' : 'primary')}
-              onClick={() => addDish()}
-              disabled={busy || !input.trim() || alreadySelected}
-            >
-              {busy ? 'AI 生成中…' : isNewDish ? '生成并添加' : '添加'}
-            </button>
+                </ul>
+              )}
+            </div>
           )}
         </div>
         {typingMode && alreadySelected && !busy && (

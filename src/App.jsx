@@ -273,7 +273,12 @@ export default function App() {
         >
           <span className="logo">灶</span>
           <div>
-            <h1>Nico的小厨房</h1>
+            <div className="brand-title-row">
+              <h1>Nico的小厨房</h1>
+              <span className="app-version" title="应用版本">
+                v{APP_VERSION}
+              </span>
+            </div>
             <p>备菜 · 计划 · 记录</p>
           </div>
         </div>
@@ -478,9 +483,6 @@ export default function App() {
       )}
 
       <nav className="bottom-nav" aria-label="主导航">
-        <p className="app-version app-version-nav" title="应用版本">
-          v{APP_VERSION}
-        </p>
         <div className="bottom-nav-inner">
           {[{ id: 'home', short: '首页' }, ...TABS].map((t) => (
             <button
@@ -500,10 +502,6 @@ export default function App() {
 
       <footer className="foot">
         Nico的小厨房 · 云端共享数据
-        <span className="app-version app-version-foot" title="应用版本">
-          {' '}
-          · v{APP_VERSION}
-        </span>
         {saveState === 'saving' && <span className="sync"> · 保存中…</span>}
         {saveState === 'saved' && <span className="sync ok"> · 已同步</span>}
         {saveState === 'error' && (

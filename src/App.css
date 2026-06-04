@@ -81,12 +81,17 @@
   transform: translate(-1px, -1px);
   box-shadow: 4px 4px 0 var(--ink);
 }
+.brand-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
 .brand h1 {
   margin: 0;
   font-size: clamp(17px, 3.8vw, 22px);
   font-weight: 600;
   letter-spacing: 0.01em;
-  white-space: nowrap;
 }
 .brand p {
   margin: 2px 0 0;
@@ -579,6 +584,9 @@
 .ingredients li:last-child {
   border-bottom: none;
 }
+.ingredients-readonly li {
+  cursor: default;
+}
 .ingredients li.done .ing-name {
   text-decoration: line-through;
   color: var(--muted);
@@ -900,14 +908,6 @@
   letter-spacing: 0.02em;
   user-select: all;
 }
-.app-version-nav {
-  display: none;
-  margin: 0;
-  padding: 2px 0 0;
-  text-align: center;
-  line-height: 1;
-}
-
 /* ---------- Home / landing ---------- */
 .home {
   display: flex;
@@ -1356,9 +1356,48 @@
   display: flex;
   gap: 8px;
 }
+.dish-add-typing {
+  flex-direction: column;
+  align-items: stretch;
+}
 .dish-add .dish-input {
   flex: 1;
   background: var(--bg);
+}
+.combo-typing {
+  flex: 1;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+}
+.combo-mode-link {
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  padding: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green-deep);
+  cursor: pointer;
+}
+.combo-mode-link:hover {
+  text-decoration: underline;
+}
+.combo-typing-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+.combo-typing-row .dish-input {
+  flex: 1;
+  min-width: 0;
+  padding-right: 12px;
+}
+.combo-menu-typeahead {
+  position: static;
+  margin-top: 8px;
+  box-shadow: none;
+  border: 1.5px solid var(--line);
 }
 
 /* ---------- Combobox (从菜谱选) ---------- */
@@ -1819,10 +1858,6 @@
 
   .foot {
     display: none;
-  }
-
-  .app-version-nav {
-    display: block;
   }
 
   .bottom-nav {

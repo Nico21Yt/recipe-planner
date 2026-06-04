@@ -9,17 +9,8 @@ export default function RecipeDetail({
   onAiModify,
 }) {
   const { toast } = useUI()
-  const [checked, setChecked] = useState(() => new Set())
   const [aiPrompt, setAiPrompt] = useState('')
   const [aiBusy, setAiBusy] = useState(false)
-
-  function toggle(idx) {
-    setChecked((prev) => {
-      const next = new Set(prev)
-      next.has(idx) ? next.delete(idx) : next.add(idx)
-      return next
-    })
-  }
 
   async function runAiModify() {
     const text = aiPrompt.trim()
@@ -82,20 +73,14 @@ export default function RecipeDetail({
       <div className="detail-grid">
         <section className="panel">
           <h3>材料清单</h3>
-          <ul className="ingredients">
+          <ul className="ingredients ingredients-readonly">
             {recipe.ingredients.map((ing, i) => (
-              <li
-                key={i}
-                className={checked.has(i) ? 'done' : ''}
-                onClick={() => toggle(i)}
-              >
-                <span className={'check' + (checked.has(i) ? ' on' : '')} />
+              <li key={i}>
                 <span className="ing-name">{ing.name}</span>
                 <span className="ing-amount">{ing.amount}</span>
               </li>
             ))}
           </ul>
-          <p className="hint">点击可勾选，方便买菜对照（仅本机）。</p>
         </section>
 
         <section className="panel">
