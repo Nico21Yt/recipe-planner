@@ -1,10 +1,9 @@
 import { useMemo, useState } from 'react'
-import { emptyPantryItem, normalizePantryItem } from '../storage'
+import { emptyPantryItem } from '../storage'
 import PageHeader from './PageHeader'
 
 export default function Pantry({ pantry, onChange }) {
   const [name, setName] = useState('')
-  const [amount, setAmount] = useState('')
   const [search, setSearch] = useState('')
 
   const sorted = useMemo(
@@ -18,30 +17,19 @@ export default function Pantry({ pantry, onChange }) {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     if (!q) return sorted
-    return sorted.filter(
-      (i) =>
-        i.name.toLowerCase().includes(q) ||
-        i.amount.toLowerCase().includes(q) ||
-        i.note.toLowerCase().includes(q),
-    )
+    return sorted.filter((i) => i.name.toLowerCase().includes(q))
   }, [sorted, search])
 
   function addItem() {
     const trimmed = name.trim()
     if (!trimmed) return
-    const item = emptyPantryItem(trimmed)
-    item.amount = amount.trim()
-    onChange([...pantry, item])
+    if (
+      pantry.some((i) => i.name.trim().toLowerCase() === trimmed.toLowerCase())
+    ) {
+      return
+    }
+    onChange([...pantry, emptyPantryItem(trimmed)])
     setName('')
-    setAmount('')
-  }
-
-  function updateItem(id, patch) {
-    onChange(
-      pantry.map((i) =>
-        i.id === id ? normalizePantryItem({ ...i, ...patch }) : i,
-      ),
-    )
   }
 
   function removeItem(id) {
@@ -69,17 +57,7 @@ export default function Pantry({ pantry, onChange }) {
           <ul className="pantry-list">
             {filtered.map((item) => (
               <li key={item.id} className="pantry-item">
-                <div className="pantry-item-main">
-                  <span className="pantry-item-name">{item.name}</span>
-                  <input
-                    className="pantry-item-amount"
-                    placeholder="数量（可选）"
-                    value={item.amount}
-                    onChange={(e) =>
-                      updateItem(item.id, { amount: e.target.value })
-                    }
-                  />
-                </div>
+                <span className="pantry-item-name">{item.name}</span>
                 <button
                   type="button"
                   className="dish-menu-dismiss"
@@ -99,24 +77,11 @@ export default function Pantry({ pantry, onChange }) {
 
         <div className="pantry-add">
           <input
-            className="dish-input pantry-name-input"
+            className="dish-input"
             placeholder="食材名称，如 鸡蛋、牛奶"
             value={name}
             enterKeyHint="done"
             onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                addItem()
-              }
-            }}
-          />
-          <input
-            className="dish-input pantry-amount-input"
-            placeholder="数量（可选）"
-            value={amount}
-            enterKeyHint="done"
-            onChange={(e) => setAmount(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault()

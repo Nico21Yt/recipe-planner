@@ -1556,43 +1556,27 @@
   align-items: center;
   gap: 8px;
 }
-.pantry-item-main {
+.pantry-item-name {
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.pantry-item-name {
   font-family: var(--font-display);
   font-size: 17px;
   font-weight: 600;
   color: var(--ink);
-  line-height: 1.3;
-}
-.pantry-item-amount {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid var(--line-strong);
-  border-radius: 8px;
-  background: var(--bg);
-  font-size: 14px;
-  outline: none;
-}
-.pantry-item-amount:focus {
-  border-color: var(--green);
-  box-shadow: 0 0 0 2px var(--green-soft);
+  line-height: 1.35;
 }
 .pantry-add {
   display: flex;
-  flex-direction: column;
+  align-items: stretch;
   gap: 8px;
 }
-.pantry-name-input {
-  width: 100%;
+.pantry-add .dish-input {
+  flex: 1;
+  min-width: 0;
 }
-.pantry-amount-input {
-  width: 100%;
+.pantry-add .btn {
+  flex-shrink: 0;
+  align-self: stretch;
 }
 
 .dish-menu {
