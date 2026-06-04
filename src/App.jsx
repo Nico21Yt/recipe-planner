@@ -38,6 +38,8 @@ export default function App() {
   const loadedRef = useRef(false)
   const saveTimer = useRef(null)
   const knownUpdatedAt = useRef(0)
+  const lastRefreshToastAt = useRef(0)
+  const REFRESH_TOAST_GAP_MS = 8000
 
   const applyRemote = useCallback(({ recipes, plans, updatedAt }) => {
     setRecipes(recipes.map(cleanRecipe))
@@ -61,7 +63,11 @@ export default function App() {
     return fetchData()
       .then((data) => {
         applyRemote(data)
-        toast('已更新到最新', 'success', 2200)
+        const now = Date.now()
+        if (now - lastRefreshToastAt.current >= REFRESH_TOAST_GAP_MS) {
+          lastRefreshToastAt.current = now
+          toast('已更新到最新', 'success', 2200)
+        }
       })
       .catch((e) => {
         toast('刷新失败：' + e.message, 'error', 3500)

@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-const THRESHOLD = 56
-const MAX_PULL = 100
+const THRESHOLD = 76
+const MAX_PULL = 150
+/** 提示文案与下方首页内容之间的留白 */
+const CONTENT_GAP = 32
 
 export default function PullToRefresh({ className = '', onRefresh, children }) {
   const scrollRef = useRef(null)
@@ -19,6 +21,11 @@ export default function PullToRefresh({ className = '', onRefresh, children }) {
     pullRef.current = n
     setPull(n)
   }, [])
+
+  const contentOffset = useCallback(
+    (amount, active) => (active ? amount + CONTENT_GAP : 0),
+    [],
+  )
 
   const runRefresh = useCallback(async () => {
     setDragging(false)
@@ -71,7 +78,7 @@ export default function PullToRefresh({ className = '', onRefresh, children }) {
       pulling.current = true
       setDragging(true)
       e.preventDefault()
-      setPullSafe(dy * 0.5)
+      setPullSafe(dy * 0.52)
     }
 
     const onEnd = () => {
@@ -103,7 +110,10 @@ export default function PullToRefresh({ className = '', onRefresh, children }) {
   }, [refreshing, runRefresh, setPullSafe])
 
   const ready = pull >= THRESHOLD
-  const showHint = pull > 6 || refreshing
+  const showHint = pull > 8 || refreshing
+  const active = pull > 0 || refreshing
+  const heldPull = refreshing ? THRESHOLD : pull
+  const innerY = contentOffset(heldPull, active)
 
   const hostClass = [
     'ptr-host',
@@ -119,7 +129,7 @@ export default function PullToRefresh({ className = '', onRefresh, children }) {
     <main ref={scrollRef} className={hostClass}>
       <div
         className="ptr-indicator"
-        style={{ height: refreshing ? THRESHOLD : pull }}
+        style={{ height: heldPull }}
         aria-hidden={!showHint}
       >
         {showHint && (
@@ -146,7 +156,7 @@ export default function PullToRefresh({ className = '', onRefresh, children }) {
       <div
         className="ptr-inner"
         style={{
-          transform: `translateY(${refreshing ? THRESHOLD : pull}px)`,
+          transform: `translateY(${innerY}px)`,
         }}
       >
         {children}
