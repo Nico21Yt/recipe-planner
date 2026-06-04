@@ -42,6 +42,21 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --app-height: 100svh;
   --app-offset-top: 0px;
+  --page-gradient: radial-gradient(
+      66% 54% at 8% -4%,
+      rgba(42, 82, 50, 0.22) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      60% 50% at 102% 4%,
+      rgba(58, 107, 67, 0.2) 0%,
+      transparent 58%
+    ),
+    radial-gradient(
+      48% 42% at 88% 100%,
+      rgba(197, 86, 42, 0.08) 0%,
+      transparent 60%
+    );
 
   font-family: var(--font-body);
   color: var(--ink);
@@ -64,22 +79,7 @@ body {
   overflow-x: hidden;
   color: var(--ink);
   background-color: var(--paper);
-  /* herb-green atmospheric wash with a faint terracotta warmth */
-  background-image: radial-gradient(
-      66% 54% at 8% -4%,
-      rgba(42, 82, 50, 0.22) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      60% 50% at 102% 4%,
-      rgba(58, 107, 67, 0.2) 0%,
-      transparent 58%
-    ),
-    radial-gradient(
-      48% 42% at 88% 100%,
-      rgba(197, 86, 42, 0.08) 0%,
-      transparent 60%
-    );
+  background-image: var(--page-gradient);
   background-attachment: fixed;
   min-height: 100vh;
   min-height: 100dvh;
