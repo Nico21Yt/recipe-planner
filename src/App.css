@@ -1543,6 +1543,73 @@
 .pantry-toolbar {
   margin-bottom: 12px;
 }
+.pantry-empty-head {
+  text-align: center;
+  margin-bottom: 4px;
+}
+.pantry-empty-title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.pantry-empty-desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.pantry-quick {
+  margin: 20px 0 18px;
+}
+.pantry-quick-label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.pantry-quick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.pantry-quick-chip {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--green-deep);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+.pantry-quick-chip:active {
+  transform: scale(0.97);
+  background: var(--green-soft);
+  border-color: var(--green);
+}
+.pantry-card-prominent {
+  border-color: var(--green);
+  box-shadow:
+    0 2px 10px rgba(31, 41, 29, 0.06),
+    0 0 0 1px rgba(58, 107, 67, 0.12);
+  padding: 22px 18px 20px;
+}
+.pantry-add-prominent {
+  margin-top: 4px;
+}
+.pantry-add-prominent .dish-input {
+  padding: 13px 14px;
+  font-size: 16px;
+  border-color: var(--line-strong);
+}
 .pantry-list {
   list-style: none;
   margin: 0 0 14px;
@@ -1574,9 +1641,35 @@
   flex: 1;
   min-width: 0;
 }
-.pantry-add .btn {
+.pantry-add-btn {
   flex-shrink: 0;
   align-self: stretch;
+  min-width: 76px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 11px;
+  border: 1.5px solid var(--line-strong);
+  background: var(--line);
+  color: var(--muted);
+  box-shadow: none;
+  transform: none;
+}
+.pantry-add-btn.ready {
+  background: var(--green);
+  border-color: var(--ink);
+  color: #fff;
+  box-shadow: 2px 3px 0 var(--ink);
+}
+.pantry-add-btn.ready:active {
+  transform: scale(0.98);
+  box-shadow: 1px 2px 0 var(--ink);
+}
+.pantry-add-btn:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .dish-menu {
@@ -2593,6 +2686,16 @@
   }
   .pantry-item-name {
     font-size: 16px;
+  }
+  .pantry-empty-title {
+    font-size: 20px;
+  }
+  .pantry-card-prominent {
+    padding: 18px 16px 16px;
+  }
+  .pantry-add-btn {
+    min-width: 72px;
+    padding: 10px 16px;
   }
   .diary-day {
     grid-template-columns: 1fr;
