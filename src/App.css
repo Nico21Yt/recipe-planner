@@ -104,10 +104,76 @@
 }
 .topbar-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
-
+.wechat-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 14px;
+  background: var(--terracotta-soft);
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.wechat-banner p {
+  margin: 0;
+  flex: 1;
+}
+.wechat-banner-dismiss {
+  flex-shrink: 0;
+  border: none;
+  background: var(--surface);
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.detail-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.detail-head-row h2 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+.bottom-nav-inner {
+  position: relative;
+}
+.bottom-nav-save {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.bottom-nav-save.save-saving {
+  color: var(--muted);
+  background: var(--surface);
+}
+.bottom-nav-save.save-saved {
+  color: var(--green-deep);
+  background: var(--green-soft);
+}
+.bottom-nav-save.save-error {
+  color: #b42318;
+  background: #fee4e2;
+}
 /* ---------- Buttons ---------- */
 .btn {
   border: 1.5px solid var(--ink);
@@ -186,9 +252,10 @@
 /* ---------- AI generate bar ---------- */
 .ai-bar {
   display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 18px;
-  flex-wrap: wrap;
 }
 .ai-bar .dish-input {
   flex: 1;
@@ -1406,6 +1473,80 @@
   align-items: center;
   gap: 8px;
 }
+.dish-menu-item-ate {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.dish-menu-item-ate:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.dish-menu-row {
+  display: grid;
+  grid-template-columns: 22px 1fr 28px;
+  align-items: center;
+  gap: 8px;
+}
+.dish-photos-compact {
+  padding-left: 30px;
+}
+.dish-photos-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.dish-photo-thumb {
+  padding: 0;
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  overflow: hidden;
+  width: 52px;
+  height: 52px;
+  cursor: pointer;
+  background: var(--bg);
+}
+.dish-photo-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.dish-photo-add {
+  flex-shrink: 0;
+}
+.dish-photos-hint {
+  margin: 4px 0 0 30px;
+  font-size: 12px;
+}
+.diary-dish-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.diary-dish-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.diary-dish-no-photo {
+  margin: 0;
+  padding-left: 4px;
+  font-size: 13px;
+}
+.photo-grid-compact {
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+}
+.photo-grid-compact .photo-item img {
+  aspect-ratio: 1;
+  object-fit: cover;
+}
 .dish-menu-no {
   font-family: var(--font-display);
   font-size: 15px;
@@ -1761,7 +1902,7 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 .diary-dish-tag {
   background: var(--green-soft);
@@ -1774,7 +1915,7 @@
   line-height: 1.35;
 }
 .diary-body > .hint {
-  margin: 0;
+  margin: 4px 0 0;
   font-size: 14px;
 }
 
@@ -2000,6 +2141,38 @@
 .lightbox-date {
   font-size: 12px;
   color: var(--muted);
+}
+
+/* ---------- Desktop: 顶栏 / 内容 / 页脚同宽居中 ---------- */
+@media (min-width: 721px) {
+  .app {
+    align-items: center;
+  }
+
+  .topbar,
+  .content,
+  .wechat-banner,
+  .update-banner,
+  .foot {
+    width: 100%;
+    max-width: 1080px;
+    box-sizing: border-box;
+  }
+
+  .topbar {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .plan-card.single,
+  .day-switch {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .day-switch {
+    max-width: 560px;
+  }
 }
 
 /* ---------- Responsive ---------- */

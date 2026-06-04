@@ -8,6 +8,8 @@ import {
   todayStr,
   weekdayCN,
 } from '../storage'
+import DishPhotos from './DishPhotos'
+import PageHeader from './PageHeader'
 
 export default function MealPlan({
   plans,
@@ -15,6 +17,7 @@ export default function MealPlan({
   onChange,
   onOpenDish,
   onGenerateRecipe,
+  onRecipePhotosChange,
 }) {
   const today = todayStr()
   const [which, setWhich] = useState('tomorrow')
@@ -162,6 +165,22 @@ export default function MealPlan({
     )
   }
 
+  function updateDish(dishId, patch) {
+    onChange(
+      ensurePlan(plans).map((p) =>
+        p.date === targetDate
+          ? {
+              ...p,
+              diary: isAte || !!p.diary,
+              dishes: p.dishes.map((d) =>
+                d.id === dishId ? { ...d, ...patch } : d,
+              ),
+            }
+          : p,
+      ),
+    )
+  }
+
   const sectionTitle =
     which === 'today'
       ? '今天吃什么'
@@ -185,12 +204,7 @@ export default function MealPlan({
 
   return (
     <main className="content">
-      <div className="section-head">
-        <div>
-          <h2>{sectionTitle}</h2>
-          <p className="section-sub">{sectionSub}</p>
-        </div>
-      </div>
+      <PageHeader title={sectionTitle} sub={sectionSub} />
 
       <div className="day-switch">
         <button
@@ -246,26 +260,64 @@ export default function MealPlan({
 
         {dishes.length > 0 ? (
           <ol className="dish-menu">
-            {dishes.map((d, i) => (
-              <li key={d.id} className="dish-menu-item">
-                <span className="dish-menu-no" aria-hidden>
-                  {i + 1}
-                </span>
-                <button
-                  type="button"
-                  className="dish-menu-name linked"
-                  onClick={() => onOpenDish({ date: targetDate, dishId: d.id })}
+            {dishes.map((d, i) => {
+              const linkedRecipe = d.recipeId
+                ? recipes.find((r) => r.id === d.recipeId) || null
+                : null
+              return (
+                <li
+                  key={d.id}
+                  className={
+                    'dish-menu-item' + (isAte ? ' dish-menu-item-ate' : '')
+                  }
                 >
-                  {d.name}
-                </button>
-                <button
-                  type="button"
-                  className="dish-menu-dismiss"
-                  aria-label={'去掉「' + d.name + '」'}
-                  onClick={() => removeDish(d.id)}
-                />
-              </li>
-            ))}
+                  <div className="dish-menu-row">
+                    <span className="dish-menu-no" aria-hidden>
+                      {i + 1}
+                    </span>
+                    {isAte ? (
+                      <span className="dish-menu-name">{d.name}</span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="dish-menu-name linked"
+                        onClick={() =>
+                          onOpenDish({ date: targetDate, dishId: d.id })
+                        }
+                      >
+                        {d.name}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="dish-menu-dismiss"
+                      aria-label={'去掉「' + d.name + '」'}
+                      onClick={() => removeDish(d.id)}
+                    />
+                  </div>
+                  {isAte && (
+                    <DishPhotos
+                      dishName={d.name}
+                      planDate={targetDate}
+                      recipe={linkedRecipe}
+                      dishPhotos={d.photos || []}
+                      onDishPhotosChange={(photos) =>
+                        updateDish(d.id, { photos })
+                      }
+                      onRecipePhotosChange={
+                        linkedRecipe && onRecipePhotosChange
+                          ? (photosOrFn) =>
+                              onRecipePhotosChange(
+                                linkedRecipe.id,
+                                photosOrFn,
+                              )
+                          : undefined
+                      }
+                    />
+                  )}
+                </li>
+              )
+            })}
           </ol>
         ) : (
           <p className="hint plan-empty-hint">{emptyHint}</p>

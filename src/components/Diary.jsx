@@ -1,26 +1,20 @@
 import { useMemo, useState } from 'react'
-import { dayOf, formatMD, relativeDay, todayStr, weekdayCN } from '../storage'
+import {
+  dayOf,
+  formatMD,
+  photosForPlanDish,
+  relativeDay,
+  todayStr,
+  weekdayCN,
+} from '../storage'
 import Lightbox from './Lightbox'
+import PageHeader from './PageHeader'
 
 export default function Diary({ plans, recipes, onOpenRecipe }) {
   const today = todayStr()
-  const [lightbox, setLightbox] = useState(null) // { photos, index }
+  const [lightbox, setLightbox] = useState(null)
 
   const entries = useMemo(() => {
-    // 所有照片按“天”归类，并记下属于哪道菜
-    const photosByDay = {}
-    recipes.forEach((r) => {
-      ;(r.photos || []).forEach((p) => {
-        const day = dayOf(p.date)
-        if (!day) return
-        ;(photosByDay[day] ||= []).push({
-          ...p,
-          recipeName: r.name,
-          recipeId: r.id,
-        })
-      })
-    })
-
     const planByDay = {}
     plans.forEach((p) => {
       planByDay[p.date] = p
@@ -28,31 +22,60 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
 
     const days = new Set()
     plans.forEach((p) => {
-      if (p.date < today || p.diary) days.add(p.date) // 过期计划 +「吃过什么」补记
+      if (p.date < today || p.diary) days.add(p.date)
     })
-    Object.keys(photosByDay).forEach((d) => days.add(d)) // 有照片的日子也算
+    recipes.forEach((r) => {
+      ;(r.photos || []).forEach((p) => {
+        const day = dayOf(p.date)
+        if (day) days.add(day)
+      })
+    })
+    plans.forEach((p) => {
+      p.dishes?.forEach((d) => {
+        ;(d.photos || []).forEach(() => days.add(p.date))
+      })
+    })
 
     return [...days]
       .sort()
       .reverse()
-      .map((date) => ({
-        date,
-        dishes: planByDay[date]?.dishes || [],
-        photos: photosByDay[date] || [],
-      }))
+      .map((date) => {
+        const dishes = planByDay[date]?.dishes || []
+        const dishRows = dishes.map((d) => ({
+          dish: d,
+          photos: photosForPlanDish(d, date, recipes).map((p) => ({
+            ...p,
+            dishName: d.name,
+            recipeId: d.recipeId || null,
+          })),
+        }))
+        const shownIds = new Set()
+        dishRows.forEach((row) =>
+          row.photos.forEach((p) => shownIds.add(p.id)),
+        )
+        const orphanPhotos = []
+        recipes.forEach((r) => {
+          ;(r.photos || []).forEach((p) => {
+            if (dayOf(p.date) !== date || shownIds.has(p.id)) return
+            orphanPhotos.push({
+              ...p,
+              dishName: r.name,
+              recipeId: r.id,
+            })
+          })
+        })
+        return { date, dishRows, orphanPhotos }
+      })
   }, [plans, recipes, today])
 
   if (entries.length === 0) {
     return (
       <main className="content">
-        <div className="section-head">
-          <h2>做饭日记</h2>
-        </div>
+        <PageHeader title="做饭日记" />
         <div className="empty">
-          <p>还没有记录。做过的菜会在这里按日期留存。</p>
+          <p>还没有记录。吃过的菜和照片会在这里按日期留存。</p>
           <p className="hint">
-            提示：在「吃什么」里用「吃过什么」补记，或安排过的菜过了当天也会出现在这里；
-            在菜谱里上传成品照，也会按拍摄日期出现。
+            在「吃什么 → 吃过什么」补记菜名并添加照片；有菜谱的菜照片会同步到菜谱。
           </p>
         </div>
       </main>
@@ -61,16 +84,18 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
 
   return (
     <main className="content">
-      <div className="section-head">
-        <div>
-          <h2>做饭日记</h2>
-          <p className="section-sub">按日期回顾做过的菜和拍下的照片。</p>
-        </div>
-      </div>
+      <PageHeader
+        title="做饭日记"
+        sub="按日期回顾吃过的菜和照片。"
+      />
 
       <div className="timeline">
         {entries.map((entry) => {
           const rel = relativeDay(entry.date)
+          const hasAnyPhoto =
+            entry.dishRows.some((r) => r.photos.length > 0) ||
+            entry.orphanPhotos.length > 0
+
           return (
             <section className="diary-day" key={entry.date}>
               <header className="diary-date">
@@ -80,34 +105,65 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
               </header>
 
               <div className="diary-body">
-                {entry.dishes.length > 0 && (
-                  <div className="diary-dishes">
-                    {entry.dishes.map((d) => (
-                      <span key={d.id} className="diary-dish-tag">
-                        {d.name}
-                      </span>
+                {entry.dishRows.length > 0 ? (
+                  <div className="diary-dish-list">
+                    {entry.dishRows.map(({ dish, photos }) => (
+                      <div key={dish.id} className="diary-dish-block">
+                        <span className="diary-dish-tag">{dish.name}</span>
+                        {photos.length > 0 ? (
+                          <div className="photo-grid photo-grid-compact">
+                            {photos.map((p, i) => (
+                              <figure key={p.id} className="photo-item">
+                                <img
+                                  src={p.src}
+                                  alt={p.dishName}
+                                  loading="lazy"
+                                  onClick={() =>
+                                    setLightbox({
+                                      photos,
+                                      index: i,
+                                      date: entry.date,
+                                    })
+                                  }
+                                />
+                              </figure>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="hint diary-dish-no-photo">暂无照片</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
+                {entry.orphanPhotos.length > 0 && (
+                  <div className="photo-grid">
+                    {entry.orphanPhotos.map((p, i) => (
+                      <figure key={p.id} className="photo-item">
+                        <img
+                          src={p.src}
+                          alt={p.dishName}
+                          loading="lazy"
+                          onClick={() =>
+                            setLightbox({
+                              photos: entry.orphanPhotos,
+                              index: i,
+                              date: entry.date,
+                            })
+                          }
+                        />
+                        <figcaption>{p.dishName}</figcaption>
+                      </figure>
                     ))}
                   </div>
                 )}
 
-                {entry.photos.length > 0 ? (
-                  <div className="photo-grid">
-                    {entry.photos.map((p, i) => (
-                      <figure key={p.id} className="photo-item">
-                        <img
-                          src={p.src}
-                          alt={p.recipeName}
-                          loading="lazy"
-                          onClick={() =>
-                            setLightbox({ photos: entry.photos, index: i })
-                          }
-                        />
-                        <figcaption>{p.caption || p.recipeName}</figcaption>
-                      </figure>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="hint">这天还没拍照记录~</p>
+                {!hasAnyPhoto && entry.dishRows.length === 0 && (
+                  <p className="hint">这天还没有记录~</p>
+                )}
+                {!hasAnyPhoto && entry.dishRows.length > 0 && (
+                  <p className="hint">这天还没拍照，可在「吃过什么」里添加。</p>
                 )}
               </div>
             </section>
@@ -123,19 +179,21 @@ export default function Diary({ plans, recipes, onOpenRecipe }) {
           renderBar={(photo) => (
             <div className="lightbox-bar">
               <div className="lightbox-info">
-                <strong>{photo.recipeName}</strong>
+                <strong>{photo.dishName}</strong>
                 {photo.caption && <span>{photo.caption}</span>}
               </div>
-              <span className="lightbox-date">{formatMD(dayOf(photo.date))}</span>
-              <button
-                className="btn ghost small"
-                onClick={() => {
-                  setLightbox(null)
-                  onOpenRecipe(photo.recipeId)
-                }}
-              >
-                查看菜谱
-              </button>
+              {photo.recipeId && onOpenRecipe && (
+                <button
+                  type="button"
+                  className="btn ghost small"
+                  onClick={() => {
+                    setLightbox(null)
+                    onOpenRecipe(photo.recipeId)
+                  }}
+                >
+                  查看菜谱
+                </button>
+              )}
             </div>
           )}
         />

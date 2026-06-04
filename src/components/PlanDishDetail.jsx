@@ -1,4 +1,5 @@
 import { formatMD, normalizePrep, relativeDay, weekdayCN } from '../storage'
+import BackBar from './BackBar'
 import RecipePhotos from './RecipePhotos'
 
 export default function PlanDishDetail({
@@ -28,11 +29,7 @@ export default function PlanDishDetail({
 
   return (
     <main className="content detail plan-dish-detail">
-      <div className="detail-bar">
-        <button className="btn ghost" onClick={onBack}>
-          ← 返回计划
-        </button>
-      </div>
+      <BackBar label="← 返回吃什么" onBack={onBack} />
 
       <div className="plan-dish-head">
         <div className="plan-dish-date">
