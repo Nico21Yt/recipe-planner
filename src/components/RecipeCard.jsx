@@ -1,4 +1,5 @@
 import { STATUS } from '../storage'
+import StatusMenu from './StatusMenu'
 
 export default function RecipeCard({
   recipe,
@@ -48,17 +49,7 @@ export default function RecipeCard({
         </div>
       )}
       <div className="card-foot" onClick={(e) => e.stopPropagation()}>
-        <select
-          className="status-select"
-          value={recipe.status}
-          onChange={(e) => onStatusChange(e.target.value)}
-        >
-          {Object.entries(STATUS).map(([key, st]) => (
-            <option key={key} value={key}>
-              {st.label}
-            </option>
-          ))}
-        </select>
+        <StatusMenu value={recipe.status} onChange={onStatusChange} />
       </div>
     </article>
   )
