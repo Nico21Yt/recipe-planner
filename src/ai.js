@@ -5,6 +5,10 @@ import { normalizeStatus } from './storage'
 const API_URL = import.meta.env.VITE_AI_API || '/api/generate-recipe'
 const MODIFY_API_URL =
   import.meta.env.VITE_AI_MODIFY_API || '/api/modify-recipe'
+const RECOGNIZE_PANTRY_API =
+  import.meta.env.VITE_AI_RECOGNIZE_PANTRY_API || '/api/recognize-pantry'
+const SUGGEST_DISHES_API =
+  import.meta.env.VITE_AI_SUGGEST_DISHES_API || '/api/suggest-dishes'
 
 function uid() {
   return 'r_' + Math.random().toString(36).slice(2, 9)
@@ -40,11 +44,29 @@ export function normalizeRecipe(raw, fallbackName) {
 }
 
 export async function generateRecipe(dish) {
-  const raw = await postAiJson(API_URL, { dish })
+  const raw = await postAiJson(API_URL, { dish }, 'recipe')
   return normalizeRecipe(raw, dish)
 }
 
-async function postAiJson(url, body) {
+export async function recognizePantryFromPhoto(imageDataUrl) {
+  const data = await postAiJson(
+    RECOGNIZE_PANTRY_API,
+    { image: imageDataUrl },
+    'ingredients',
+  )
+  return Array.isArray(data) ? data.map((s) => s.toString().trim()).filter(Boolean) : []
+}
+
+export async function suggestDishesFromIngredients(ingredients) {
+  const data = await postAiJson(
+    SUGGEST_DISHES_API,
+    { ingredients },
+    'dishes',
+  )
+  return Array.isArray(data) ? data.map((s) => s.toString().trim()).filter(Boolean) : []
+}
+
+async function postAiJson(url, body, resultKey = 'recipe') {
   let resp
   try {
     resp = await fetch(url, {
@@ -66,10 +88,11 @@ async function postAiJson(url, body) {
   if (!resp.ok) {
     throw new Error(data.error || `请求失败（${resp.status}）`)
   }
-  if (!data.recipe) {
-    throw new Error('AI 没有返回菜谱，请重试')
+  const payload = data[resultKey]
+  if (payload == null) {
+    throw new Error('AI 没有返回有效结果，请重试')
   }
-  return data.recipe
+  return payload
 }
 
 export async function modifyRecipe(existing, instruction) {

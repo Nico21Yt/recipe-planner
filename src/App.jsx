@@ -381,7 +381,13 @@ export default function App() {
 
       {!loading && !loadError && tab === 'pantry' && (
         <Suspense fallback={<TabFallback />}>
-          <Pantry pantry={pantry} onChange={setPantry} />
+          <Pantry
+            pantry={pantry}
+            onChange={setPantry}
+            recipes={recipes}
+            onGenerateRecipe={handleGenerate}
+            genBusy={genBusy}
+          />
         </Suspense>
       )}
 
