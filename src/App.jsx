@@ -1,11 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import {
-  CATEGORIES,
-  STATUS,
-  cleanRecipe,
-  emptyRecipe,
-  normalizePlans,
-} from './storage'
+import { STATUS, cleanRecipe, emptyRecipe, normalizePlans } from './storage'
 import RecipeCard from './components/RecipeCard'
 import RecipeDetail from './components/RecipeDetail'
 import RecipeForm from './components/RecipeForm'
@@ -35,7 +29,6 @@ export default function App() {
   const [planDish, setPlanDish] = useState(null) // { date, dishId }
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
-  const [filterCategory, setFilterCategory] = useState('all')
   const [genInput, setGenInput] = useState('')
   const [genBusy, setGenBusy] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -113,13 +106,10 @@ export default function App() {
     return recipes
       .filter((r) => {
         if (filterStatus !== 'all' && r.status !== filterStatus) return false
-        if (filterCategory !== 'all' && r.category !== filterCategory)
-          return false
         if (!q) return true
         const hay = [
           r.name,
           r.notes,
-          ...(r.tags || []),
           ...(r.ingredients || []).map((i) => i.name),
         ]
           .join(' ')
@@ -132,7 +122,7 @@ export default function App() {
         if (bTodo !== aTodo) return bTodo - aTodo
         return (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0)
       })
-  }, [recipes, search, filterStatus, filterCategory])
+  }, [recipes, search, filterStatus])
 
   const counts = useMemo(() => {
     const c = { all: recipes.length, todo: 0, done: 0 }
@@ -223,13 +213,14 @@ export default function App() {
   }
 
   function handleSave(recipe) {
+    const cleaned = cleanRecipe(recipe)
     setRecipes((prev) => {
-      const exists = prev.some((r) => r.id === recipe.id)
+      const exists = prev.some((r) => r.id === cleaned.id)
       return exists
-        ? prev.map((r) => (r.id === recipe.id ? recipe : r))
-        : [recipe, ...prev]
+        ? prev.map((r) => (r.id === cleaned.id ? cleaned : r))
+        : [cleaned, ...prev]
     })
-    openDetail(recipe.id)
+    openDetail(cleaned.id)
   }
 
   async function handleDelete(id) {
@@ -412,7 +403,7 @@ export default function App() {
           <div className="toolbar">
             <input
               className="search"
-              placeholder="搜索菜名 / 食材 / 标签…"
+              placeholder="搜索菜名 / 食材…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -432,18 +423,6 @@ export default function App() {
                   </Chip>
                 ))}
               </div>
-              <select
-                className="select"
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-              >
-                <option value="all">全部分类</option>
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 
@@ -523,7 +502,6 @@ function SkeletonCard() {
       <div className="sk-line sk-badge" />
       <div className="sk-line sk-title" />
       <div className="sk-line sk-meta" />
-      <div className="sk-line sk-tag" />
       <p className="sk-hint">AI 正在生成菜谱…</p>
     </article>
   )

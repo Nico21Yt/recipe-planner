@@ -1,12 +1,8 @@
 // 根据用户描述修改现有菜谱（保留菜名/结构，按指令调整内容）
 
-const CATEGORIES = ['家常菜', '汤羹', '主食', '甜点', '凉菜', '早餐', '其他']
-
 const SYSTEM_PROMPT = `你是一位耐心的中餐料理老师。用户会给你「现有菜谱」和「修改要求」，你要输出修改后的**完整**菜谱 JSON：
 {
   "name": "菜名（字符串，除非用户要求改名否则可保持或微调）",
-  "category": "分类，必须是这几个之一：${CATEGORIES.join('、')}",
-  "tags": ["3个以内的简短标签，不要用「新手友好」"],
   "ingredients": [{"name": "食材名", "amount": "用量"}],
   "steps": ["按顺序的做法步骤，每步一句话，写清楚火候、温度和时间"],
   "notes": "给新手的小贴士（一两句话）"
@@ -30,8 +26,6 @@ const SYSTEM_PROMPT = `你是一位耐心的中餐料理老师。用户会给你
 function recipeForAi(recipe) {
   return {
     name: (recipe.name || '').toString(),
-    category: recipe.category || '家常菜',
-    tags: Array.isArray(recipe.tags) ? recipe.tags : [],
     ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
     steps: Array.isArray(recipe.steps) ? recipe.steps : [],
     notes: (recipe.notes || '').toString(),

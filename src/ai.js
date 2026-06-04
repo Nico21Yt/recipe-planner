@@ -1,4 +1,4 @@
-import { CATEGORIES, cleanTags } from './storage'
+import { normalizeStatus } from './storage'
 
 // 后端代理地址：部署到 Vercel 时用相对路径 /api/generate-recipe 即可。
 // 如果前端和后端分开部署，可在 .env 里设 VITE_AI_API 指向后端完整地址。
@@ -10,7 +10,6 @@ function uid() {
   return 'r_' + Math.random().toString(36).slice(2, 9)
 }
 
-// 把 AI 返回的数据收拾成我们 app 用的标准菜谱结构
 export function normalizeRecipe(raw, fallbackName) {
   const r = raw || {}
 
@@ -28,19 +27,11 @@ export function normalizeRecipe(raw, fallbackName) {
     ? r.steps.map((s) => s.toString().trim()).filter(Boolean)
     : []
 
-  const tags = cleanTags(
-    Array.isArray(r.tags)
-      ? r.tags.map((t) => t.toString().trim()).filter(Boolean).slice(0, 4)
-      : [],
-  )
-
   return {
     id: uid(),
     name: (r.name || fallbackName || '').toString().trim() || fallbackName,
-    category: CATEGORIES.includes(r.category) ? r.category : '家常菜',
     status: 'todo',
     favorite: false,
-    tags,
     ingredients: ingredients.length ? ingredients : [{ name: '', amount: '' }],
     steps: steps.length ? steps : [''],
     notes: (r.notes || '').toString(),
@@ -81,14 +72,11 @@ async function postAiJson(url, body) {
   return data.recipe
 }
 
-/** 按用户说明修改现有菜谱，保留 id / 照片 / 收藏等字段 */
 export async function modifyRecipe(existing, instruction) {
   const raw = await postAiJson(MODIFY_API_URL, {
     instruction: instruction.trim(),
     recipe: {
       name: existing.name,
-      category: existing.category,
-      tags: existing.tags,
       ingredients: existing.ingredients,
       steps: existing.steps,
       notes: existing.notes,
@@ -98,10 +86,9 @@ export async function modifyRecipe(existing, instruction) {
   return {
     ...existing,
     name: patch.name,
-    category: patch.category,
-    tags: patch.tags,
     ingredients: patch.ingredients,
     steps: patch.steps,
     notes: patch.notes,
+    status: normalizeStatus(existing.status),
   }
 }

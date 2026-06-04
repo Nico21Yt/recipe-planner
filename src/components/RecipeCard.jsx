@@ -24,30 +24,18 @@ export default function RecipeCard({
         <span className="badge" style={{ background: s.color }}>
           {s.label}
         </span>
-        <div className="card-top-right">
-          <span className="cat">{recipe.category}</span>
-          <button
-            type="button"
-            className={'star' + (recipe.favorite ? ' on' : '')}
-            title={recipe.favorite ? '取消收藏' : '收藏'}
-            aria-label={recipe.favorite ? '取消收藏' : '收藏'}
-            onClick={(e) => {
-              e.stopPropagation()
-              onToggleFavorite?.()
-            }}
-          />
-        </div>
+        <button
+          type="button"
+          className={'star' + (recipe.favorite ? ' on' : '')}
+          title={recipe.favorite ? '取消收藏' : '收藏'}
+          aria-label={recipe.favorite ? '取消收藏' : '收藏'}
+          onClick={(e) => {
+            e.stopPropagation()
+            onToggleFavorite?.()
+          }}
+        />
       </div>
       <h3 className="card-title">{recipe.name || '未命名'}</h3>
-      {recipe.tags?.length > 0 && (
-        <div className="tags">
-          {recipe.tags.map((t) => (
-            <span key={t} className="tag">
-              {t}
-            </span>
-          ))}
-        </div>
-      )}
       <div className="card-foot" onClick={(e) => e.stopPropagation()}>
         <StatusMenu value={recipe.status} onChange={onStatusChange} />
       </div>

@@ -1,11 +1,3 @@
-export const CATEGORIES = ['家常菜', '汤羹', '主食', '甜点', '凉菜', '早餐', '其他']
-
-const EXCLUDED_TAGS = new Set(['新手友好'])
-
-export function cleanTags(tags) {
-  return (tags || []).filter((t) => t && !EXCLUDED_TAGS.has(String(t).trim()))
-}
-
 export const STATUS = {
   todo: { label: '想试', color: '#cf9a2c' },
   done: { label: '做过', color: '#3c6e47' },
@@ -18,11 +10,8 @@ export function normalizeStatus(status) {
 
 export function cleanRecipe(recipe) {
   if (!recipe) return recipe
-  return {
-    ...recipe,
-    tags: cleanTags(recipe.tags),
-    status: normalizeStatus(recipe.status),
-  }
+  const { category, tags, ...rest } = recipe
+  return { ...rest, status: normalizeStatus(recipe.status) }
 }
 
 function uid() {
@@ -33,10 +22,8 @@ export function emptyRecipe() {
   return {
     id: uid(),
     name: '',
-    category: '家常菜',
     status: 'todo',
     favorite: false,
-    tags: [],
     ingredients: [{ name: '', amount: '' }],
     steps: [''],
     notes: '',

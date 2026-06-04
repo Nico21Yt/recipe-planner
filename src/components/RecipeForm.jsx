@@ -1,17 +1,15 @@
 import { useState } from 'react'
-import { CATEGORIES, STATUS, cleanTags } from '../storage'
+import StatusMenu from './StatusMenu'
 import { useUI } from '../ui-context'
 
 export default function RecipeForm({ initial, onCancel, onSave }) {
   const { toast } = useUI()
   const [r, setR] = useState(() => structuredClone(initial))
-  const [tagInput, setTagInput] = useState('')
 
   function set(field, value) {
     setR((prev) => ({ ...prev, [field]: value }))
   }
 
-  // ---- 材料 ----
   function setIngredient(i, key, value) {
     setR((prev) => {
       const ingredients = prev.ingredients.map((ing, idx) =>
@@ -33,7 +31,6 @@ export default function RecipeForm({ initial, onCancel, onSave }) {
     }))
   }
 
-  // ---- 步骤 ----
   function setStep(i, value) {
     setR((prev) => ({
       ...prev,
@@ -48,17 +45,6 @@ export default function RecipeForm({ initial, onCancel, onSave }) {
       ...prev,
       steps: prev.steps.filter((_, idx) => idx !== i),
     }))
-  }
-
-  // ---- 标签 ----
-  function addTag() {
-    const t = tagInput.trim()
-    if (!t || r.tags.includes(t)) return
-    setR((prev) => ({ ...prev, tags: [...prev.tags, t] }))
-    setTagInput('')
-  }
-  function removeTag(t) {
-    setR((prev) => ({ ...prev, tags: prev.tags.filter((x) => x !== t) }))
   }
 
   function submit(e) {
@@ -76,7 +62,8 @@ export default function RecipeForm({ initial, onCancel, onSave }) {
     delete cleaned.time
     delete cleaned.servings
     delete cleaned.difficulty
-    cleaned.tags = cleanTags(cleaned.tags)
+    delete cleaned.category
+    delete cleaned.tags
     onSave(cleaned)
   }
 
@@ -105,57 +92,10 @@ export default function RecipeForm({ initial, onCancel, onSave }) {
           />
         </label>
 
-        <div className="field-row">
-          <label className="field">
-            <span>分类</span>
-            <select value={r.category} onChange={(e) => set('category', e.target.value)}>
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>状态</span>
-            <select value={r.status} onChange={(e) => set('status', e.target.value)}>
-              {Object.entries(STATUS).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <div className="field">
-          <span>标签</span>
-          <div className="tag-editor">
-            {r.tags.map((t) => (
-              <span key={t} className="tag removable">
-                {t}
-                <button
-                  type="button"
-                  className="tag-remove"
-                  aria-label={'移除标签 ' + t}
-                  onClick={() => removeTag(t)}
-                />
-              </span>
-            ))}
-            <input
-              className="tag-input"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  addTag()
-                }
-              }}
-              placeholder="输入后回车，如 快手"
-            />
-          </div>
-        </div>
+        <label className="field">
+          <span>状态</span>
+          <StatusMenu value={r.status} onChange={(status) => set('status', status)} />
+        </label>
 
         <div className="field">
           <span>材料</span>
