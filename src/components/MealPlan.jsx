@@ -4,6 +4,7 @@ import {
   emptyPlan,
   formatMD,
   makeDish,
+  relativeDay,
   todayStr,
   weekdayCN,
 } from '../storage'
@@ -17,13 +18,19 @@ export default function MealPlan({
 }) {
   const today = todayStr()
   const [which, setWhich] = useState('tomorrow')
+  const [ateDate, setAteDate] = useState(today)
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
   const [listOpen, setListOpen] = useState(false)
   const comboRef = useRef(null)
   const inputRef = useRef(null)
 
-  const targetDate = which === 'today' ? today : addDays(today, 1)
+  const isAte = which === 'ate'
+  const targetDate = isAte
+    ? ateDate
+    : which === 'today'
+      ? today
+      : addDays(today, 1)
 
   function closeList() {
     setListOpen(false)
@@ -55,13 +62,17 @@ export default function MealPlan({
 
   function ensurePlan(list) {
     if (list.some((p) => p.date === targetDate)) return list
-    return [...list, emptyPlan(targetDate)]
+    return [...list, emptyPlan(targetDate, { diary: isAte })]
+  }
+
+  function markDiary(patch) {
+    return isAte ? { ...patch, diary: true } : patch
   }
 
   function updatePlan(patch) {
     onChange(
       ensurePlan(plans).map((p) =>
-        p.date === targetDate ? { ...p, ...patch } : p,
+        p.date === targetDate ? { ...p, ...markDiary(patch) } : p,
       ),
     )
   }
@@ -70,7 +81,9 @@ export default function MealPlan({
     const withPlan = ensurePlan(currentPlans)
     onChange(
       withPlan.map((p) =>
-        p.date === targetDate ? { ...p, dishes: [...p.dishes, dish] } : p,
+        p.date === targetDate
+          ? { ...p, diary: isAte || !!p.diary, dishes: [...p.dishes, dish] }
+          : p,
       ),
     )
   }
@@ -142,36 +155,91 @@ export default function MealPlan({
     )
   }
 
+  const sectionTitle =
+    which === 'today'
+      ? '今天吃什么'
+      : which === 'tomorrow'
+        ? '明天吃什么'
+        : '吃过什么'
+
+  const sectionSub = isAte
+    ? '补记某天吃过的菜，会出现在做饭日记。'
+    : '挑好菜，备注留给做菜的人。'
+
+  const dateRel = isAte
+    ? relativeDay(targetDate) || '补记'
+    : which === 'today'
+      ? '今天'
+      : '明天'
+
+  const chefNoteLabel = isAte
+    ? '这天的备注'
+    : which === 'today'
+      ? '今天的菜谱备注'
+      : '明天的菜谱备注'
+
+  const emptyHint = isAte
+    ? '还没记录，加几道吃过的菜吧。'
+    : '还没安排，加几道想做的菜吧。'
+
   return (
     <main className="content">
       <div className="section-head">
         <div>
-          <h2>{which === 'today' ? '今天吃什么' : '明天吃什么'}</h2>
-          <p className="section-sub">挑好菜，备注留给做菜的人。</p>
+          <h2>{sectionTitle}</h2>
+          <p className="section-sub">{sectionSub}</p>
         </div>
       </div>
 
       <div className="day-switch">
         <button
+          type="button"
           className={'day-tab' + (which === 'today' ? ' active' : '')}
           onClick={() => setWhich('today')}
         >
           今天吃什么
         </button>
         <button
+          type="button"
           className={'day-tab' + (which === 'tomorrow' ? ' active' : '')}
           onClick={() => setWhich('tomorrow')}
         >
           明天吃什么
+        </button>
+        <button
+          type="button"
+          className={'day-tab' + (isAte ? ' active' : '')}
+          onClick={() => setWhich('ate')}
+        >
+          吃过什么
         </button>
       </div>
 
       <section className="plan-card single">
         <div className="plan-card-head">
           <div className="plan-date">
-            <span className="rel">{which === 'today' ? '今天' : '明天'}</span>
+            {isAte ? (
+              <label className="ate-date-pick">
+                <span className="sr-only">选择日期</span>
+                <input
+                  type="date"
+                  className="date-input ate-date-input"
+                  value={ateDate}
+                  max={today}
+                  onChange={(e) => {
+                    const v = e.target.value
+                    if (v && v <= today) setAteDate(v)
+                  }}
+                />
+              </label>
+            ) : (
+              <span className="rel">{dateRel}</span>
+            )}
             <span className="md">{formatMD(targetDate)}</span>
             <span className="wd">{weekdayCN(targetDate)}</span>
+            {isAte && relativeDay(targetDate) && (
+              <span className="rel rel-muted">{relativeDay(targetDate)}</span>
+            )}
           </div>
         </div>
 
@@ -199,7 +267,7 @@ export default function MealPlan({
             ))}
           </ol>
         ) : (
-          <p className="hint plan-empty-hint">还没安排，加几道想做的菜吧。</p>
+          <p className="hint plan-empty-hint">{emptyHint}</p>
         )}
 
         <div className="dish-add">
@@ -251,7 +319,7 @@ export default function MealPlan({
                       ? '菜谱为空'
                       : query
                         ? '没有匹配的菜'
-                        : '可选的菜都已在计划里'}
+                        : '可选的菜都已在记录里'}
                   </li>
                 )}
               </ul>
@@ -269,16 +337,14 @@ export default function MealPlan({
           )}
         </div>
         {hasInput && alreadySelected && !busy && (
-          <p className="hint">已在计划里。</p>
+          <p className="hint">已在{isAte ? '记录' : '计划'}里。</p>
         )}
         {hasInput && isNewDish && !busy && !alreadySelected && (
           <p className="hint">新菜名将用 AI 生成菜谱并加入。</p>
         )}
 
         <label className="chef-note">
-          <span className="chef-note-label">
-            {which === 'today' ? '今天的菜谱备注' : '明天的菜谱备注'}
-          </span>
+          <span className="chef-note-label">{chefNoteLabel}</span>
           <textarea
             className="chef-note-input"
             rows={3}

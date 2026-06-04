@@ -1264,8 +1264,11 @@
 
 /* ---------- Meal plan ---------- */
 .day-switch {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   gap: 0;
+  width: 100%;
+  max-width: 560px;
   background: var(--surface);
   border: 1.5px solid var(--ink);
   border-radius: 12px;
@@ -1274,14 +1277,45 @@
   box-shadow: 3px 3px 0 var(--ink);
 }
 .day-tab {
+  flex: 1;
+  min-width: 0;
   border: none;
   background: transparent;
   color: var(--ink-2);
-  padding: 9px 24px;
+  padding: 9px 10px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.plan-date .rel-muted {
+  background: var(--line);
+  color: var(--ink-2);
+  box-shadow: 1.5px 1.5px 0 var(--line-strong);
+}
+.ate-date-pick {
+  display: inline-flex;
+  align-items: center;
+}
+.ate-date-input {
+  width: auto;
+  max-width: 148px;
+  padding: 6px 10px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 .day-tab.active {
   background: var(--green);

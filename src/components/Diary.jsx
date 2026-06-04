@@ -28,7 +28,7 @@ export default function Diary({ plans, recipes, onOpenPlanDish, onOpenRecipe }) 
 
     const days = new Set()
     plans.forEach((p) => {
-      if (p.date < today) days.add(p.date) // 过期的计划进日记
+      if (p.date < today || p.diary) days.add(p.date) // 过期计划 +「吃过什么」补记
     })
     Object.keys(photosByDay).forEach((d) => days.add(d)) // 有照片的日子也算
 
@@ -51,7 +51,7 @@ export default function Diary({ plans, recipes, onOpenPlanDish, onOpenRecipe }) 
         <div className="empty">
           <p>还没有记录。做过的菜会在这里按日期留存。</p>
           <p className="hint">
-            提示：在「明天吃什么」安排菜，到日子后就会出现在这里；
+            提示：在「吃什么」里用「吃过什么」补记，或安排过的菜过了当天也会出现在这里；
             在菜谱里上传成品照，也会按拍摄日期出现。
           </p>
         </div>

@@ -70,12 +70,13 @@ export function readPhoto(file, maxSize = 1280, quality = 0.82) {
 
 /* ============== 用餐计划（明天吃什么 / 做饭日记） ============== */
 
-export function emptyPlan(date) {
+export function emptyPlan(date, opts = {}) {
   return {
     id: 'pl_' + Math.random().toString(36).slice(2, 9),
     date,
     dishes: [],
     chefNote: '',
+    diary: !!opts.diary,
   }
 }
 
@@ -100,6 +101,7 @@ export function normalizePlan(plan) {
   return {
     ...plan,
     chefNote: plan.chefNote ?? '',
+    diary: !!plan.diary,
     dishes: (plan.dishes || []).map(normalizeDish),
   }
 }
