@@ -2463,11 +2463,15 @@
     grid-template-columns: 1fr;
     max-width: 360px;
   }
+  .content.home {
+    padding-bottom: calc(112px + var(--safe-bottom));
+  }
+
   .home,
   .ptr-host.home .ptr-inner {
     min-height: 0;
     justify-content: flex-start;
-    padding: 8px 0 16px;
+    padding: 8px 0 24px;
   }
 
   .home-hero {
